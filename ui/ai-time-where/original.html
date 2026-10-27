@@ -1,0 +1,1553 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="color-scheme" content="light" />
+<meta name="theme-color" content="#fbf8f5" />
+<meta name="description" content="读取本机 WorkBuddy 会话记录，把 AI 使用时间按闲聊 / 修复BUG / 搭建环境 / 测试Skill&MCP / 搜索信息 / 工作 分类统计。全部在浏览器本地解析，数据不上传。" />
+<title>AI 时间都去哪了 · 会话分类统计</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23132b69'/%3E%3Ccircle cx='16' cy='16' r='9' fill='none' stroke='%23fbf8f5' stroke-width='2.4'/%3E%3Cpath d='M16 11v5l3.5 2' stroke='%23f6c200' stroke-width='2.4' stroke-linecap='round' fill='none'/%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Khand:wght@500;700&family=Hind:wght@400;600&family=Long+Cang&family=Noto+Sans+SC:wght@400;700;900&display=swap" />
+<style>
+:root{
+  --paper:#fbf8f5; --ink:#132b69; --orange:#d04e00; --deep:#a00e00; --yellow:#f6c200;
+  --line:#132b691a; --card:#ffffff;
+  --numf:'Khand','Bahnschrift','Arial Narrow','Oswald',ui-sans-serif,sans-serif;
+  --hand:'Long Cang','华文行楷','STXingkai','Xingkai SC','KaiTi','楷体','STKaiti','Kaiti SC','Noto Sans SC',cursive;
+}
+*,*::before,*::after{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}
+html,body{height:100%}
+body{margin:0;overflow-x:hidden;background:var(--paper);color:var(--ink);
+  font-family:Hind,'Noto Sans SC',-apple-system,'Segoe UI',sans-serif;
+  -webkit-font-smoothing:antialiased;font-feature-settings:'tnum';}
+[data-k=paper]{
+  min-height:100dvh;
+  background-color:var(--paper);
+  background-image:linear-gradient(#132b690d 1px,transparent 1px),linear-gradient(90deg,#132b690d 1px,transparent 1px);
+  background-size:28px 28px;
+}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+input,select{font:inherit;color:inherit}
+a{color:inherit}
+.num{font-family:var(--numf);font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:.01em}
+.hand{font-family:var(--hand);line-height:1}
+.wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+.eyebrow{font-family:var(--numf);text-transform:uppercase;letter-spacing:.3em;font-size:15px;font-weight:500;color:var(--orange)}
+
+/* ---------- gate ---------- */
+.gate{max-width:760px;margin:0 auto;padding:64px 24px 80px}
+.gate h1{font-family:'Noto Sans SC',sans-serif;font-weight:900;font-size:clamp(38px,6vw,60px);line-height:1.05;letter-spacing:-.02em;margin:10px 0 0}
+.gate .sub{margin:18px 0 0;font-size:16px;line-height:1.75;color:#132b69cc;max-width:46em}
+.card{background:#ffffffd9;border-radius:22px;box-shadow:0 1px 0 #132b6922,0 18px 40px -28px #132b6940;padding:26px 26px 24px;margin-top:30px}
+.chips{display:flex;flex-wrap:wrap;margin:0 0 18px;padding:0;list-style:none;font-size:12.5px;font-weight:500;color:#132b698c}
+.chips li{display:inline-flex;align-items:center}
+.chips li::after{content:'·';margin:0 9px;color:#132b6947}
+.chips li:last-child::after{content:'';margin:0}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;border-radius:999px;font-weight:700;
+  padding:15px 26px;font-size:16px;transition:transform .12s,box-shadow .12s,background .12s}
+.btn-primary{background:var(--orange);color:#fbf8f5;box-shadow:0 4px 0 #a00e00}
+.btn-primary:hover{background:#e05600}
+.btn-primary:active{transform:translateY(4px);box-shadow:none}
+.btn-ghost{background:#fff;box-shadow:inset 0 0 0 1px #132b6930}
+.btn-ghost:hover{background:#fff;box-shadow:inset 0 0 0 1px #132b6960,0 2px 8px #132b691a}
+.btn:focus-visible{outline:3px solid var(--yellow);outline-offset:3px}
+.path{display:grid;gap:8px;margin:22px 0 0;font-size:13.5px;color:#132b69b0}
+.path code{background:#132b690d;border-radius:8px;padding:3px 7px;font-size:12.5px;font-family:ui-monospace,Consolas,monospace;word-break:break-all}
+.note{margin:14px 0 0;font-size:13px;line-height:1.7;color:#132b6980}
+.alert{margin:18px 0 0;padding:12px 16px;border-radius:12px;background:#a00e0012;color:var(--deep);font-size:14px;line-height:1.6;box-shadow:inset 0 0 0 1px #a00e0030}
+
+/* ---------- scan ---------- */
+.scan{max-width:640px;margin:0 auto;padding:110px 24px}
+.scan h2{font-family:'Noto Sans SC',sans-serif;font-weight:900;font-size:30px;margin:0 0 8px}
+.bar-track{height:12px;border-radius:999px;background:#132b6914;overflow:hidden;margin:26px 0 14px}
+.bar-fill{height:100%;background:linear-gradient(90deg,var(--orange),var(--yellow));border-radius:999px;transition:width .25s ease}
+.scan-meta{display:flex;justify-content:space-between;font-size:13.5px;color:#132b69a0}
+.scan-file{margin-top:8px;font-size:12.5px;color:#132b6966;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;direction:rtl;text-align:left}
+
+/* ---------- result ---------- */
+.topbar{position:sticky;top:0;z-index:30;backdrop-filter:blur(10px);background:#fbf8f5e8;border-bottom:1px solid var(--line)}
+.topbar .wrap{display:flex;align-items:center;gap:16px;height:62px}
+@media (max-width:700px){
+  .topbar .wrap{flex-wrap:wrap;height:auto;padding-top:9px;padding-bottom:9px;gap:9px}
+  .topbar .brand{font-size:15px;order:1}
+  .topbar .spacer{display:none}
+  .topbar [data-act=export-json],.hide-sm{display:none}
+  .topbar [data-act=share]{order:2;margin-left:auto}
+  .topbar [data-act=pick]{order:2}
+  .topbar .seg{order:3;flex:1 1 100%}
+  .seg button{padding:6px 8px;font-size:12px;flex:1}
+  .icon-btn{padding:6px 11px;font-size:12.5px}
+  .stem-txt .pv-mac{display:none}
+}
+.topbar .brand{font-family:'Noto Sans SC',sans-serif;font-weight:900;font-size:17px;letter-spacing:-.01em}
+.topbar .spacer{flex:1}
+.seg{display:flex;background:#132b690d;border-radius:999px;padding:3px}
+.seg button{padding:6px 13px;border-radius:999px;font-size:13px;font-weight:600;color:#132b69a0}
+.seg button[aria-pressed=true]{background:#fff;color:var(--ink);box-shadow:0 1px 3px #132b6926}
+.icon-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:999px;font-size:13.5px;font-weight:600;box-shadow:inset 0 0 0 1px #132b6930}
+.icon-btn:hover{background:#fff}
+.hero{padding:46px 0 8px}
+.hero h1{font-family:'Noto Sans SC',sans-serif;font-weight:900;font-size:clamp(30px,4.4vw,46px);line-height:1.1;letter-spacing:-.02em;margin:6px 0 0}
+.hero .lede{margin:10px 0 0;font-size:14.5px;color:#132b69a6}
+.demo-banner{margin:16px 0 0;padding:9px 14px;border-radius:12px;background:#f6c20030;font-size:13px;font-weight:600}
+.toast{position:fixed;left:50%;bottom:34px;transform:translate(-50%,14px);background:#132b69;color:#fbf8f5;
+  padding:11px 20px;border-radius:999px;font-size:13.5px;font-weight:600;opacity:0;pointer-events:none;
+  transition:opacity .2s,transform .2s;z-index:99}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.stem{display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin:24px 0 0;padding:14px 18px;border-radius:14px;background:#f6c2001a;box-shadow:inset 0 0 0 1px #f6c2005c}
+.stem-txt{flex:1 1 340px;font-size:13.5px;line-height:1.65;color:#132b69cc}
+.stem-txt code{background:#ffffffb3;border-radius:6px;padding:2px 6px;font-size:12.5px;font-family:ui-monospace,Consolas,monospace;white-space:nowrap}
+.stem-btn{padding:10px 18px;font-size:14px;flex:0 0 auto}
+.primary-ghost{box-shadow:inset 0 0 0 1px var(--orange);color:var(--orange)}
+
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:26px 0 4px}
+.kpi{background:#ffffffcc;border-radius:16px;padding:16px 18px;box-shadow:inset 0 0 0 1px #132b6914}
+.kpi .lab{font-size:12.5px;color:#132b6990;font-weight:600}
+.kpi .val{font-size:40px;line-height:1.1;margin-top:4px;display:flex;align-items:baseline;gap:4px}
+.kpi .val small{font-size:15px;font-weight:600;font-family:Hind,sans-serif;opacity:.65}
+
+/* stacked hero bar */
+.stage{position:relative;margin:34px 0 0;height:340px}
+.bar{position:absolute;left:0;right:0;top:126px;height:112px;display:flex;filter:drop-shadow(0 10px 0 #132b6914)}
+.seg-i{position:relative;height:100%;overflow:hidden;
+  background-image:repeating-linear-gradient(115deg,rgba(255,255,255,.07) 0 10px,transparent 10px 22px);
+  background-size:200% 100%;animation:drift 18s linear infinite;transition:width .5s cubic-bezier(.2,.9,.3,1.2)}
+@keyframes drift{to{background-position:-400px 0}}
+.seg-i:first-child{border-radius:14px 0 0 14px}
+.seg-i:last-child{border-radius:0 14px 14px 0}
+.seg-i:only-child{border-radius:14px}
+.pcts{position:absolute;inset:0;pointer-events:none}
+.pct{position:absolute;display:inline-flex;align-items:baseline;gap:5px;white-space:nowrap;
+  font-family:var(--numf);font-weight:700;font-size:34px;line-height:1}
+.pct i{font-style:normal;font-size:15px;opacity:.85}
+.seg-i:hover{filter:brightness(1.06)}
+.leads{position:absolute;inset:0;pointer-events:none;overflow:visible}
+.leads path{fill:none;stroke:#132b69;stroke-width:2.2;stroke-linecap:round;opacity:.85}
+.hand-wrap{position:absolute;top:0;left:0;pointer-events:none;will-change:transform}
+.hand-wrap .hand-label{position:relative;display:block;white-space:nowrap;color:var(--ink);font-family:var(--hand)}
+
+/* legend / table */
+.legend{margin:8px 0 0;display:grid;gap:8px}
+.row{display:grid;grid-template-columns:14px 1.3fr 88px 1fr 62px 96px;align-items:center;gap:14px;
+  background:#ffffffb3;border-radius:13px;padding:11px 16px;box-shadow:inset 0 0 0 1px #132b6912}
+.row.head{background:none;box-shadow:none;padding:4px 16px;font-size:12px;color:#132b6980;font-weight:600}
+.dot{width:14px;height:14px;border-radius:50%;box-shadow:inset 0 0 0 1px #132b6930}
+.row .nm{font-family:var(--hand);font-size:26px;line-height:1}
+.row .h{font-family:var(--numf);font-size:22px;font-weight:700;text-align:right}
+.row .h small{font-size:12px;font-weight:600;opacity:.6;margin-left:3px}
+.mini{height:7px;border-radius:999px;background:#132b6910;overflow:hidden}
+.mini i{display:block;height:100%;border-radius:999px}
+.row .pc{font-family:var(--numf);font-size:18px;text-align:right;opacity:.85}
+.row .ct{font-size:12.5px;text-align:right;color:#132b6990}
+
+/* day strip */
+.panel{margin:38px 0 0;background:#ffffffb3;border-radius:20px;padding:22px 24px;box-shadow:inset 0 0 0 1px #132b6912}
+.panel h2{font-family:'Noto Sans SC',sans-serif;font-size:17px;font-weight:900;margin:0}
+.panel .hint{font-size:12.5px;color:#132b6985;margin:5px 0 0;line-height:1.6}
+.days{display:flex;align-items:flex-end;gap:5px;height:150px;margin:20px 0 0;overflow-x:auto;padding-bottom:2px}
+.day{flex:1 0 14px;min-width:14px;display:flex;flex-direction:column;justify-content:flex-end;height:100%;position:relative}
+.day .stack{display:flex;flex-direction:column-reverse;border-radius:4px 4px 0 0;overflow:hidden;min-height:2px;transition:height .4s}
+.day .stack i{display:block;width:100%}
+.day span{font-family:var(--numf);font-size:11px;text-align:center;color:#132b6970;margin-top:5px;height:14px}
+.day:hover .stack{filter:brightness(1.08)}
+
+/* sessions */
+.tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:16px 0 0}
+.field{display:flex;align-items:center;gap:8px;background:#fff;border-radius:999px;padding:8px 14px;box-shadow:inset 0 0 0 1px #132b6926;font-size:13.5px}
+.field input[type=search]{border:none;outline:none;background:none;width:170px}
+.sess{margin:14px 0 0;display:grid;gap:6px;max-height:520px;overflow:auto;padding-right:4px}
+.s-item{display:grid;grid-template-columns:74px 1fr 130px 76px 56px;gap:12px;align-items:center;
+  background:#ffffffcc;border-radius:11px;padding:10px 14px;box-shadow:inset 0 0 0 1px #132b6912;font-size:13.5px}
+.s-item .d{font-family:var(--numf);font-size:15px;color:#132b6970}
+.s-item .t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer}
+.s-item .t:hover{text-decoration:underline;text-decoration-color:var(--orange);text-decoration-thickness:2px;text-underline-offset:3px}
+.s-item .dur{font-family:var(--numf);font-size:16px;text-align:right;font-weight:700}
+.s-item .turns{font-size:12px;text-align:right;color:#132b6985}
+.s-item .edit{position:relative}
+.s-item select{appearance:none;width:100%;background:#132b690a;border-radius:999px;padding:6px 22px 6px 11px;font-size:12.5px;font-weight:600;outline:none;cursor:pointer;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23132b69' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 9px center}
+.s-item select:focus-visible{outline:2px solid var(--orange);outline-offset:2px}
+.s-detail{grid-column:1/-1;font-size:12.5px;line-height:1.75;color:#132b69a6;border-top:1px dashed var(--line);margin-top:4px;padding-top:8px;display:none}
+.s-item.open{background:#fff}
+.s-item.open .s-detail{display:block}
+.s-detail b{color:var(--ink)}
+.more{margin:14px 0 0;font-size:13px;color:#132b6960}
+
+/* settings */
+.sliders{display:grid;gap:26px 40px;margin:18px 0 0;grid-template-columns:1fr 1fr}
+.slider{background:#132b6908;border-radius:13px;padding:13px 15px}
+.slider label{display:flex;justify-content:space-between;font-size:13px;font-weight:600;margin-bottom:8px}
+.slider label span{font-family:var(--numf);font-size:15px;font-weight:700;color:var(--orange)}
+input[type=range]{width:100%;accent-color:var(--orange)}
+.foot{margin:52px 0 0;padding:22px 0 60px;border-top:1px solid var(--line);font-size:12.5px;line-height:1.85;color:#132b6980}
+.foot b{color:#132b69b0}
+@media (max-width:860px){
+  .kpis{grid-template-columns:repeat(2,1fr)}
+  .row{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}
+  .row .dot{flex:0 0 14px}
+  .row .nm{flex:1 1 auto;min-width:0;font-size:21px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .row .h{flex:0 0 auto;font-size:20px}
+  .row .pc{flex:0 0 40px}
+  .row .mini{flex:1 1 100%;order:5;margin-top:2px}
+  .row .ct{order:6;flex:1 1 auto;text-align:left;font-size:12px}
+  .row.head{display:none}
+  .s-item{grid-template-columns:50px 1fr 104px;grid-template-areas:'d t e' 'd u u';font-size:13px}
+  .s-item .d{grid-area:d}.s-item .t{grid-area:t}.s-item .edit{grid-area:e}.s-item .dur{grid-area:u;text-align:left}
+  .s-item .turns{display:none}
+  .sliders{grid-template-columns:1fr}
+  .stage{height:auto;margin:24px 0 6px}
+  .bar{position:relative;top:auto;right:auto;height:78px;border-radius:14px;overflow:hidden}
+  .pct{font-size:21px}
+  .pct i{font-size:11px}
+  .leads,.hand-wrap{display:none!important}
+  .topbar{position:static}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<input type="file" id="pick" webkitdirectory directory multiple hidden />
+<script>
+(function(){
+'use strict';
+
+/* ============================================================
+   分类定义
+   ============================================================ */
+var CATS = [
+  {key:'chat',  name:'闲聊',           color:'#e58aa6', light:true },
+  {key:'bug',   name:'修复BUG',        color:'#a00e00', light:false},
+  {key:'env',   name:'搭建运行环境',   color:'#d04e00', light:false},
+  {key:'skill', name:'测试技能',       color:'#f6c200', light:true },
+  {key:'search',name:'搜索信息',       color:'#0086a8', light:false},
+  {key:'img',   name:'图片创作',       color:'#5f8f3e', light:false},
+  {key:'video', name:'视频创作',       color:'#7b4fa3', light:false},
+  {key:'novel', name:'写小说',         color:'#8a6d3b', light:false},
+  {key:'work',  name:'工作',           color:'#132b69', light:false}
+];
+var CAT = {}; CATS.forEach(function(c){CAT[c.key]=c;});
+var TIE_ORDER = ['bug','env','skill','video','img','novel','search','chat','work'];
+
+/* 关键词 -> [词, 权重]
+   注意：“页面 / 生成 / 分析 / 整理 / 数据 / 做一个”这类泛词绝不能算进工作，
+   它们几乎每条会话都会出现，会把工作类撑成垃圾桶。工作只认具体交付物。 */
+var KW = {
+  bug:[['报错',3],['错误',2],['异常',2],['失败',2],['不生效',3],['没反应',2],['没生效',3],
+       ['修复',3],['修一下',3],['修好',2],['崩了',3],['崩溃',3],['挂了',2],['白屏',3],['黑屏',3],
+       ['跑不起',3],['跑不通',3],['打不开',2],['闪退',3],['乱码',3],['卡住',2],['卡死',2],
+       ['超时',2],['无法',1],['不对',1],['失效',2],['无效',2],['加载不出',3],['不出图',3],
+       ['bug',3],['error',2],['traceback',3],['404',2],['500',2],['502',2],['429',2]],
+  env:[['安装',3],['装一下',2],['环境变量',4],['依赖',3],['pip install',4],['npm install',4],
+       ['install -g',4],['npx',3],['venv',3],['conda',3],['部署',3],['端口',2],['镜像',2],
+       ['代理',2],['注册表',3],['启动服务',3],['初始化',2],['搭建',2],['配置',2],['docker',3],
+       ['证书',2],['权限',1],['sdk',2],['驱动',2],['systemd',2],['环境',2],['命令行',2],
+       ['版本',1],['升级',1],['卸载',2],['重装',3],['服务起不来',3],['跑起来',2]],
+  skill:[['mcp',3],['连接器',3],['插件',2],['子代理',2],['技能',1.5],['skill',1],
+         ['工具链',2],['调用失败',2],['授权',1.5]],
+  search:[['搜索',3],['搜一下',3],['查一下',3],['查查',3],['查询',2],['调研',3],['资料',2],
+          ['对比',2],['攻略',3],['趋势',2],['数据来源',2],['小红书',3],['公众号',2],
+          ['新闻',2],['行情',2],['找找',2],['帮我找',2]],
+  img:[['图片',2],['生图',4],['出图',4],['画图',3],['绘图',3],['画画',3],['配图',3],['插画',4],
+       ['海报',4],['头像',3],['立绘',3],['表情包',3],['封面',3],['文生图',5],['图生图',5],['修图',3],
+       ['换背景',2],['抠图',3],['icon',1],['图标',1]],
+  video:[['视频',4],['分镜',4],['解说词',4],['配音',4],['剪辑',4],['渲染',2],['字幕',3],['转场',4],
+         ['片头',3],['片尾',3],['BGM',3],['bgm',3],['台词',3],['音色',3],['tts',3],['动画',3],
+         ['镜头',3],['画面',2],['场景',1],['时长',1]],
+  novel:[['小说',5],['章节',4],['剧情',4],['人物设定',4],['大纲',4],['连载',4],['主角',3],['配角',3],
+         ['世界观',3],['番外',4],['同人',4],['正文',2],['文笔',3],['开坑',3],['断更',3],['楔子',3],
+         ['人设',3],['伏笔',3]],
+  work:[['对账',4],['账单',4],['合同',3],['发票',3],['报价',3],['报告',3],['文档',2],['表格',3],
+        ['excel',3],['xlsx',3],['docx',3],['ppt',3],['pdf',2],['方案',2],['文案',3],['汇报',3],
+        ['纪要',3],['排版',2],['文章',2]],
+  chat:[['你好',2],['谢谢',2],['哈哈',2],['拜拜',3],['晚安',3],['早上好',2],['在吗',3],
+        ['收到',1],['好吧',2],['随便',2],['聊聊',3],['无聊',3],['有趣',1]]
+};
+
+var SKILL_TOOLS = {'Skill':1,'search_plugins':1,'suggest_plugin_install':1,'list_installed_plugins':1,'ToolSearch':1,'DeferExecuteTool':1,'AskUserQuestion':1,'skill_management':1};
+
+/* ============================================================
+   工具函数
+   ============================================================ */
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function $(sel,root){return (root||document).querySelector(sel);}
+function el(html){var d=document.createElement('div');d.innerHTML=html.trim();return d.firstElementChild;}
+function pad(n){return n<10?'0'+n:''+n;}
+function dayKey(ts){var d=new Date(ts);return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
+function dayLabel(ts){var d=new Date(ts);return pad(d.getMonth()+1)+'.'+pad(d.getDate());}
+function fmtH(ms){return (ms/3600000);}
+function fmtDur(ms){
+  var m=Math.round(ms/60000);
+  if(m<1) return '不到 1 分钟';
+  if(m<60) return m+' 分钟';
+  var h=Math.floor(m/60), r=m%60;
+  return r? h+' 小时 '+r+' 分' : h+' 小时';
+}
+function fmtHShort(ms){
+  var h=ms/3600000;
+  if(h<1) return Math.round(ms/60000)+'min';
+  return (h>=10? h.toFixed(0): h.toFixed(1))+'h';
+}
+function hText(ms){
+  var h=ms/3600000;
+  if(h>=100) return h.toFixed(0);
+  if(h>=10) return h.toFixed(1);
+  return h.toFixed(1);
+}
+
+/* ============================================================
+   解析
+   ============================================================ */
+var TS_RE=/"timestamp"\s*:\s*(\d{13})/;
+var ROLE_USER_RE=/"role"\s*:\s*"user"/;
+var REM_RES=[
+  /<system-reminder[\s\S]*?<\/system-reminder>/gi,
+  /<user_info[\s\S]*?<\/user_info>/gi,
+  /<additional_data[\s\S]*?<\/additional_data>/gi,
+  /<project_context[\s\S]*?<\/project_context>/gi,
+  /<memory_and_skills_reminder[\s\S]*?<\/memory_and_skills_reminder>/gi,
+  /<user_references[\s\S]*?<\/user_references>/gi,
+  /<attached_files[\s\S]*?<\/attached_files>/gi,
+  /<current_time[\s\S]*?<\/current_time>/gi,
+  /<craft_mode[\s\S]*?<\/craft_mode>/gi,
+  /<wecom_[^>]*>[\s\S]*?<\/wecom_[^>]*>/gi
+];
+var TOOL_RE=/"name"\s*:\s*"([A-Za-z_][\w:.\-]{2,44})"/g;
+
+function cleanUserText(t){
+  if(!t) return '';
+  var s=t;
+  for(var i=0;i<REM_RES.length;i++) s=s.replace(REM_RES[i],' ');
+  s=s.replace(/<[^>]{0,90}>/g,' ');
+  s=s.replace(/\[Omitted long matching line\]/g,' ');
+  s=s.replace(/\s+/g,' ').trim();
+  return s;
+}
+
+/* 这些虽然挂在 user 角色下，其实是系统塞进来的，不是人打的字 */
+function isRealUserText(t){
+  if(!t) return false;
+  if(/^summary\s*[:：]/i.test(t)) return false;
+  if(/^#+\s*summary\b/i.test(t)) return false;
+  if(/^summary of the conversation/i.test(t)) return false;
+  if(/^<message_quote|message_quote type=/i.test(t)) return false;
+  if(/^【语言规则/.test(t)) return false;
+  if(/^请?继续?执行任务$/.test(t)) return false;
+  if(/\bchatcmpl-tool-|\bcall_[0-9a-f]{12,}\b/i.test(t.slice(0,160))) return false;
+  if(/^please continue with the conversation/i.test(t)) return false;
+  if(/^[A-Za-z0-9]{5,8}\s+call_[0-9a-f]{12,}\s+completed/i.test(t)) return false;
+  if(/^<?task-notification/i.test(t)) return false;
+  if(/^(background command|command completed)/i.test(t)) return false;
+  if(/^\[?agent\s+".{0,40}"\s+(completed|finished)/i.test(t)) return false;
+  if(/^call_[0-9a-f]{12,}/i.test(t)) return false;
+  if(/^this session is being continued/i.test(t)) return false;
+  return true;
+}
+
+var FULL_CAP=12*1024*1024, HEAD_CAP=4*1024*1024, TAIL_CAP=1*1024*1024;
+
+function readFileSmart(file){
+  if(file.size<=FULL_CAP) return file.text();
+  return Promise.all([
+    file.slice(0,HEAD_CAP).text(),
+    file.slice(Math.max(0,file.size-TAIL_CAP)).text()
+  ]).then(function(parts){return parts[0]+'\n'+parts[1];});
+}
+
+function analyzeText(text){
+  var out={ts:[],texts:[],turnTs:[],tools:{},errs:0,msgs:0,sampled:false};
+  var lines=text.split('\n');
+  for(var i=0;i<lines.length;i++){
+    var line=lines[i];
+    if(line.length<20) continue;
+    var m=TS_RE.exec(line);
+    if(!m) continue;
+    out.ts.push(+m[1]);
+    if(line.indexOf('"type":"message"')!==-1 || line.indexOf('"type": "message"')!==-1) out.msgs++;
+    if(ROLE_USER_RE.test(line)){
+      if(line.length<400000){
+        try{
+          var d=JSON.parse(line);
+          var cont=d.content||[];
+          if(Array.isArray(cont)){
+            var buf=[];
+            for(var j=0;j<cont.length;j++){
+              var c=cont[j];
+              if(c&&c.type==='input_text'&&c.text) buf.push(c.text);
+            }
+            if(buf.length){
+              var t=cleanUserText(buf.join(' '));
+              if(t&&t.length>2&&isRealUserText(t)){ out.texts.push(t); out.turnTs.push(+m[1]); }
+            }
+          }
+        }catch(e){}
+      }
+    }else if(line.indexOf('tool_use')!==-1){
+      TOOL_RE.lastIndex=0;
+      var tm;
+      while((tm=TOOL_RE.exec(line))){
+        var nm=tm[1];
+        if(/^(mcp__|[A-Z])/.test(nm)){
+          if(nm.length>40) continue;
+          out.tools[nm]=(out.tools[nm]||0)+1;
+        }
+      }
+    }
+    if(line.indexOf('"is_error":true')!==-1) out.errs++;
+  }
+  return out;
+}
+
+/* ============================================================
+   分类打分
+   ============================================================ */
+function hitCount(txt,kw){
+  var i=txt.indexOf(kw), n=0, from=0;
+  while(i!==-1 && n<8){n++; from=i+kw.length; i=txt.indexOf(kw,from);}
+  return n;
+}
+
+var SCORE_KEYS=['bug','env','skill','img','video','novel','search','work','chat'];
+
+/* 给一段文字打分。charsBase 控制密度归一的强度：
+   会话级 1200（长会话要压），单轮 600（一轮本来就没几个字） */
+function scoreCore(txt,charsBase,tools,errs){
+  var chars=Math.max(120,Math.min(txt.length,24000));
+  var norm=Math.max(1,Math.sqrt(chars/charsBase));
+
+  var kw={}; SCORE_KEYS.forEach(function(k){ kw[k]=0; });
+  Object.keys(KW).forEach(function(k){
+    var arr=KW[k];
+    for(var i=0;i<arr.length;i++){
+      var n=hitCount(txt,arr[i][0]);
+      if(n) kw[k]+=Math.min(n,2)*arr[i][1];
+    }
+    kw[k]=Math.min(kw[k],14);
+  });
+
+  var ab={}; SCORE_KEYS.forEach(function(k){ ab[k]=0; });
+
+  // ---- 行为信号（代表真实动作，不经归一）----
+  if(tools){
+    var skillTools=0, webCalls=0, docTools=0;
+    Object.keys(tools).forEach(function(nm){
+      if(SKILL_TOOLS[nm]||nm.indexOf('mcp__')===0) skillTools+=tools[nm];
+      if(nm==='WebSearch') webCalls+=tools[nm]*2.4;
+      if(nm==='WebFetch') webCalls+=tools[nm]*1.6;
+      if(/docx|sheet|pptx|office|excel|word/i.test(nm)) docTools+=tools[nm];
+    });
+    ab.skill+=Math.min(skillTools,30)*0.5;
+    ab.search+=Math.min(webCalls,20);
+    ab.work+=Math.min(docTools,10)*1.1;
+    ab.bug+=Math.min(errs||0,6)*0.12;
+  }
+
+  // ---- 强规则 ----
+  // 产出型动词按“产出物”分别归类
+  if(/(做|写|生成|制作|剪|录|出)[^。，,]{0,10}(视频|分镜|动画|短片)/.test(txt)) ab.video+=4;
+  if(/(做|写|制作)[^。，,]{0,14}(分\d*秒|分钟)/.test(txt)) ab.video+=2;
+  if(/(画|生成|制作|出|做)[^。，,]{0,10}(海报|插画|头像|图|立绘|表情包)/.test(txt)) ab.img+=3;
+  if(/(做|写|生成|制作|出)[^。，,]{0,10}(文章|报告|文档|ppt|稿|小说)/.test(txt)) ab.work+=3;
+
+  // 安装/环境动作
+  if(/(npm install|pip install|install -g|npx |环境变量|export path|重装|卸载|配置环境)/.test(txt)) ab.env+=3;
+
+  // 只有“折腾工具链”才算测试技能；单纯用技能干活不算
+  if(/(装|安装|卸载|配置|接入|测试|测一下|调试|连不上|连不通|调不通|授权|注册)[^。，,]{0,10}(skill|技能|mcp|连接器|插件|子代理)/.test(txt)) ab.skill+=4;
+  else if(/(skill|mcp|连接器|子代理)[^。，,]{0,10}(装|安装|配置|授权|报错|失败|不通)/.test(txt)) ab.skill+=3;
+  // 技能本身的升级/迭代/改版 —— 是折腾工具，不是拿技能干活
+  if(/(技能|skill|插件|连接器)[^。，,]{0,14}(升级|迭代|版本|更新|重构|改造|融合|合并|替换|换成)/.test(txt)) ab.skill+=4.5;
+  if(/(升级|迭代|重构|改造)[^。，,]{0,10}(技能|skill)/.test(txt)) ab.skill+=4.5;
+  if(/mcp\.json|opencli/.test(txt)) ab.skill+=1.5;
+
+  // 网关/代理/站点/额度这类“工具本身在运转”的事 —— 算搭建运行环境
+  if(/(网关|代理|站点|节点|端口|域名|额度|限额|密钥|证书|中转|反代)[^。，,]{0,14}(升级|版本|配置|切换|回滚|限流|失败|不通|超限|额度|费用|余额)/.test(txt)) ab.env+=4.5;
+  if(/(升级|配置|调整|切换|回滚)[^。，,]{0,10}(网关|代理|站点|节点|额度|密钥|中转|反代)/.test(txt)) ab.env+=4.5;
+
+  // 出错密度：用户自己反复提到错误，才是真的在修东西
+  var errHits=0, errWords=['报错','错误','失败','不生效','没反应','崩了','崩溃','白屏','乱码','闪退','卡住','跑不起','跑不通','超时','异常'];
+  for(var e=0;e<errWords.length;e++) if(txt.indexOf(errWords[e])!==-1) errHits++;
+  if(errHits>=2) ab.bug+=Math.min(errHits,5)*1.1;
+
+  // 返工/挑毛病：对着已有产出说“不对/空白/重做”，本质也是修
+  if(/(不行|不对|空白|错位|缺失|漏了|没出现|不一致|太小|太大|太挤|太丑|生硬|无反应|没反应|失效|重做|重新做|修复|修好)/.test(txt)) ab.bug+=4;
+  // 普通改稿（把标题改成 X）属于正常产出，只给一点点
+  else if(/(改成|改一下|改一改|修改|换掉|调整一下|补上|去掉|加上)/.test(txt)) ab.bug+=1.2;
+
+  var sc={};
+  for(var i=0;i<SCORE_KEYS.length;i++){
+    var k=SCORE_KEYS[i];
+    sc[k]=kw[k]/norm+ab[k];
+  }
+
+  // 闲聊：必须自己就长得像闲聊，不给免费分
+  var isChit=chars<70 && /^(你好|嗨|hi|hello|在吗|谢谢|好的|嗯|哈哈|早上好|晚安|拜拜|随便聊)/.test(txt);
+  if(isChit) sc.chat+=5;
+
+  var best=null,bv=-1;
+  for(var j=0;j<TIE_ORDER.length;j++){
+    var kk=TIE_ORDER[j];
+    if(sc[kk]>bv){bv=sc[kk];best=kk;}
+  }
+  return {sc:sc,cat:best,v:bv,isChit:isChit};
+}
+
+/* 会话级：首条消息代表意图，给双倍权重 */
+function classifyDetail(s){
+  var texts=s.texts.slice(0,60);
+  var txt=((texts[0]||'')+' '+(texts[0]||'')+' '+texts.slice(1).join(' ')).toLowerCase();
+  var r=scoreCore(txt,1200,s.tools,s.errs);
+  var cat=r.cat;
+  if(r.v<1.6) cat='chat';
+  var top=SCORE_KEYS.slice().sort(function(a,b){return r.sc[b]-r.sc[a];}).slice(0,3)
+    .map(function(k){return {key:k,v:Math.round(r.sc[k]*10)/10};});
+  return {cat:cat,scores:r.sc,top:top};
+}
+
+/* 单轮：判断这一轮在干什么。判不出来就继承上一轮；
+   整条会话一开始就判不出来时，先算「闲聊」，之后由 assignTopics() 试着归到关键词类 */
+function classifyTurn(text,prevCat){
+  var t=(text||'').toLowerCase();
+  if(!t || t.length<4) return {cat:prevCat||'chat', low:!prevCat};
+  var r=scoreCore(t,600,null,0);
+  if(r.v<1.8) return {cat:prevCat||'chat', low:!prevCat};
+  return {cat:r.cat, low:false};
+}
+
+/* 判不出来的会话统一算「闲聊」——不硬塞进「工作」，
+   也不拿半截关键词硬造分类（浏览器里没有中文分词，抽出来常是「始健」这种词）。
+   分类永远是固定的六类，图表不会因为数据不同而变形。 */
+
+/* 目前只有预设六类；保留这两个函数，方便以后接自定义分类 */
+function allCats(){
+  return CATS.concat(S.dyn||[]);
+}
+function catOf(key){
+  if(CAT[key]) return CAT[key];
+  var d=(S.dyn||[]);
+  for(var i=0;i<d.length;i++) if(d[i].key===key) return d[i];
+  return {key:key,name:key,color:'#888'};
+}
+
+/* ============================================================
+   时长计算：按“这一轮在干什么”分摊，而不是整条会话贴一个标签
+   ============================================================ */
+function buildGaps(ts){
+  ts.sort(function(a,b){return a-b;});
+  var gaps=[];
+  for(var i=1;i<ts.length;i++){
+    var g=ts[i]-ts[i-1];
+    if(g>0 && g<6*3600000) gaps.push([ts[i-1],g]);
+  }
+  return gaps;
+}
+
+/* 遍历会话里每一段活跃时间，回调 (毫秒, 分类, 起始时间戳) */
+function walkGaps(sess,capMin,breakMin,fn){
+  var cap=capMin*60000, brk=breakMin*60000;
+  var turns=sess.turns||[], T=turns.length, ti=0;
+  var forced=sess.forced? sess.cat : null;
+  for(var i=0;i<sess.gaps.length;i++){
+    var start=sess.gaps[i][0], g=sess.gaps[i][1];
+    if(g>brk) continue;
+    while(ti+1<T && turns[ti+1].ts<=start) ti++;
+    var cat=forced || (T? turns[ti].cat : sess.auto);
+    fn(Math.min(g,cap), cat, start);
+  }
+}
+
+/* 一条会话按分类拆开的时间（用于“时间构成”和会话主类判定） */
+function sessionMix(sess,capMin,breakMin){
+  var out={};
+  walkGaps(sess,capMin||5,breakMin||30,function(ms,cat){
+    out[cat]=(out[cat]||0)+ms;
+  });
+  return out;
+}
+function dominantCat(mix,fallback){
+  var best=fallback, bv=-1;
+  Object.keys(mix).forEach(function(k){ if(mix[k]>bv){bv=mix[k];best=k;} });
+  return best;
+}
+
+/* ============================================================
+   状态
+   ============================================================ */
+var LS_OVERRIDE='ai-time-v2:override';
+var LS_SETTINGS='ai-time-v2:settings';
+
+var S={
+  screen:'result',
+  error:'',
+  sessions:[],
+  meta:{files:0,bytes:0,sampled:0,ms:0},
+  range:'all',
+  cap:5,
+  breakMin:30,
+  query:'',
+  sort:'dur',
+  expanded:{},
+  showAll:null,
+  demo:false,
+  scanning:false,
+  scanned:0,
+  total:0,
+  currentFile:''
+};
+
+try{
+  var st=JSON.parse(localStorage.getItem(LS_SETTINGS)||'null');
+  if(st&&typeof st.cap==='number'){S.cap=st.cap;S.breakMin=st.breakMin||30;S.range=st.range||'all';}
+}catch(e){}
+var OVERRIDE={};
+try{OVERRIDE=JSON.parse(localStorage.getItem(LS_OVERRIDE)||'{}')||{};}catch(e){OVERRIDE={};}
+
+function saveSettings(){
+  try{localStorage.setItem(LS_SETTINGS,JSON.stringify({cap:S.cap,breakMin:S.breakMin,range:S.range}));}catch(e){}
+}
+
+/* ============================================================
+   扫描
+   ============================================================ */
+function isSessionFile(path){
+  if(!/\.jsonl$/i.test(path)) return false;
+  if(/node_modules|\.git\/|\/cache\//i.test(path)) return false;
+  return true;
+}
+
+function scanEntries(entries){
+  // entries: [{file, path}]
+  // 如果选到了 .workbuddy 根目录，只认 projects/ 下的会话，别的一律不碰
+  var underProjects=entries.filter(function(e){return /(^|[\\\/])projects[\\\/]/i.test(e.path);});
+  var pool=underProjects.length? underProjects : entries;
+  var files=pool.filter(function(e){return isSessionFile(e.path);});
+  if(!files.length){
+    S.error='这个目录里没找到会话文件（*.jsonl）。请选到 .workbuddy\\projects 这一层——Windows 一般在 C:\\Users\\你的用户名\\.workbuddy\\projects。';
+    S.screen='result';
+    render();
+    return;
+  }
+  files.sort(function(a,b){return a.path<b.path?-1:1;});
+  S.total=files.length; S.scanned=0; S.screen='scan'; S.error='';
+  S.meta={files:files.length,bytes:0,sampled:0,ms:0};
+  var t0=performance.now();
+  var out=[];
+  var i=0;
+
+  function step(){
+    if(i>=files.length){
+      finish(out,t0);
+      return;
+    }
+    var batch=Math.min(i+6,files.length);
+    var jobs=[];
+    for(var k=i;k<batch;k++){
+      jobs.push(readFileSmart(files[k].file).then(function(f){return f;}).catch(function(){return '';}));
+    }
+    var slice=files.slice(i,batch);
+    Promise.all(jobs).then(function(texts){
+      for(var k=0;k<texts.length;k++){
+        var tx=texts[k];
+        if(!tx) continue;
+        var a=analyzeText(tx);
+        if(!a.ts.length) continue;
+        var sizes=slice[k].file.size;
+        S.meta.bytes+=sizes;
+        var tsSorted=a.ts.slice().sort(function(x,y){return x-y;});
+        var sess={
+          id:slice[k].path,
+          path:slice[k].path,
+          start:tsSorted[0],
+          end:tsSorted[tsSorted.length-1],
+          gaps:buildGaps(a.ts),
+          texts:a.texts.slice(0,40),
+          tools:a.tools,
+          errs:a.errs,
+          msgs:a.msgs,
+          sampled:sizes>FULL_CAP
+        };
+        if(sess.sampled) S.meta.sampled++;
+
+        // 把每一轮用户消息判个类，时间按轮分摊
+        var built=(function(){
+          var arr=[], prev=null, low=false;
+          for(var t=0;t<sess.texts.length;t++){
+            var r=classifyTurn(sess.texts[t],prev);
+            if(t===0) low=!!r.low;
+            arr.push({ts:a.turnTs[t]||sess.start, cat:r.cat});
+            prev=r.cat;
+          }
+          return {arr:arr, low:low};
+        })();
+        sess.turns=built.arr;
+        sess.low=built.low;
+        sess.auto=dominantCat(sessionMix(sess,5,30), classifyDetail(sess).cat);
+        sess.top=classifyDetail(sess).top;
+        sess.forced=!!OVERRIDE[sess.id];
+        sess.cat=OVERRIDE[sess.id]||sess.auto;
+        sess.mix=sessionMix(sess,5,30);
+        sess.title=(sess.texts[0]||slice[k].path.split('/').pop()).slice(0,110);
+        out.push(sess);
+      }
+      i=batch; S.scanned=i;
+      S.currentFile=slice[slice.length-1].path;
+      paintScan();
+      setTimeout(step,0);
+    });
+  }
+  step();
+}
+
+function finish(list,t0){
+  S.sessions=list;
+  S.error='';
+  S.demo=false;
+  S.meta.ms=Math.round(performance.now()-t0);
+  S.screen='result';
+  S.scanning=false;
+  render();
+}
+
+function paintScan(){
+  var f=$('#scanFill'), m=$('#scanMeta'), fn=$('#scanFile');
+  var p=S.total?Math.round(S.scanned/S.total*100):0;
+  if(f) f.style.width=p+'%';
+  if(m) m.innerHTML='<span>已扫描 '+S.scanned+' / '+S.total+' 个会话文件</span><span>'+p+'%</span>';
+  if(fn) fn.textContent=S.currentFile||'';
+}
+
+/* ============================================================
+   目录入口
+   ============================================================ */
+function pickFolder(){
+  if(window.showDirectoryPicker){
+    window.showDirectoryPicker({id:'workbuddy',mode:'read'}).then(function(handle){
+      var entries=[];
+      function walk(dir,prefix){
+        var it=dir.entries();
+        function next(){
+          return it.next().then(function(res){
+            if(res.done) return Promise.resolve();
+            var name=res.value[0], h=res.value[1];
+            var path=prefix+name;
+            if(h.kind==='file'){
+              return h.getFile().then(function(f){
+                entries.push({file:f,path:path});
+                if(entries.length%400===0){S.currentFile='已枚举 '+entries.length+' 个文件…';paintScan();}
+                return;
+              },function(){}).then(next);
+            }
+            if(/^(node_modules|\.git|cache|binaries|blobs|vendor|logs|traces)$/.test(name)) return next();
+            return walk(h,path+'/').then(next);
+          });
+        }
+        return next();
+      }
+      S.screen='scan';S.total=0;S.scanned=0;S.currentFile='正在读取目录结构…';render();
+      return walk(handle,'').then(function(){
+        if(!entries.length){throw new Error('empty');}
+        scanEntries(entries);
+      });
+    }).catch(function(err){
+      if(err&&err.name==='AbortError'){return;}
+      if(err&&err.name==='SecurityError'){
+        S.error='浏览器拦下了目录授权（本地双击打开时常见）。请改用系统文件夹选择框，或把页面部署到 https 后再试。';
+        S.screen='result';render();return;
+      }
+      // 回退到 input
+      var inp=$('#pick'); if(inp) inp.click();
+    });
+  }else{
+    var inp=$('#pick'); if(inp) inp.click();
+  }
+}
+
+function handleInputFiles(fileList){
+  var entries=[];
+  for(var i=0;i<fileList.length;i++){
+    var f=fileList[i];
+    var p=f.webkitRelativePath||f.name;
+    entries.push({file:f,path:p});
+  }
+  if(!entries.length) return;
+  S.screen='scan';S.total=0;S.scanned=0;S.currentFile='正在整理文件…';render();
+  setTimeout(function(){scanEntries(entries);},30);
+}
+
+/* ============================================================
+   示例数据
+   ============================================================ */
+function demoData(){
+  var now=Date.now(), out=[];
+  // 确定性伪随机，保证每次演示长得一样
+  var seed=20261022;
+  function rnd(){seed=(seed*1103515245+12345)&0x7fffffff;return seed/0x7fffffff;}
+  var pool=[];
+  [['work',22],['video',16],['img',10],['novel',5],['skill',15],['search',15],['bug',10],['env',5],['chat',2]].forEach(function(p){
+    for(var i=0;i<p[1];i++) pool.push(p[0]);
+  });
+  var titles={
+    work:['整理季度对账表，把三份账单合并','写一份项目复盘报告','把会议纪要整理成文档','核对合同金额与付款节点','把这批数据做成可筛选的看板'],
+    video:['做一个3分钟的科普视频','把上一条的配音换成女声','调整第3场的分镜和转场','给视频重新配一版字幕'],
+    img:['给文章配三张插图','用 AI 生成一张封面海报','这个头像再修一版','把这张图改成手绘风格'],
+    novel:['续写第三章','把主角的性格再立一立','给小说补一份人物设定','这一章的节奏有点拖，压一压'],
+    skill:['测试新装的 MCP 连接器能不能连通','@skill 跑一遍看输出对不对','调试子代理的任务分发','验证插件授权流程','给这个技能补一份输入说明'],
+    search:['查一下这个方案在业内的普遍做法','对比三个候选工具的差异','搜一批参考资料做调研','确认这个 API 的最新文档','找几家同类型产品的定价'],
+    bug:['这里报错了，帮我看下堆栈','改完之后页面白屏','这个功能不生效，重试了几次','运行时报 404，找不到路径','装完依赖反而跑不起来'],
+    env:['装一下依赖，跑起来看看','配置环境变量和端口','把服务部署到云上','初始化项目骨架'],
+    chat:['你好，在吗','随便聊聊，AI 会累吗','谢谢，先这样','哈哈，这个有意思']
+  };
+  var n=0;
+  for(var d=0;d<74;d++){
+    var dayStart=now-d*86400000;
+    var cnt=1+Math.floor(rnd()*3.4);
+    if(d%7===5) cnt=0;                 // 周末大部分不动
+    for(var c=0;c<cnt;c++){
+      var cat=pool[Math.floor(rnd()*pool.length)];
+      var start=dayStart-(c*2.6+1)*3600000-Math.floor(rnd()*2400000);
+      var turns=2+Math.floor(rnd()*26);
+      var ts=[],t=start;
+      for(var i=0;i<turns;i++){
+        ts.push(t);
+        // 间隔忽长忽短：多数几十秒到几分钟，偶尔发呆十几分钟
+        var g=rnd()<0.12 ? 6*60000+rnd()*22*60000 : 12000+rnd()*4*60000;
+        t+=Math.floor(g);
+      }
+      var arr=titles[cat]||titles.work;
+      var title=arr[Math.floor(rnd()*arr.length)];
+      out.push({
+        id:'demo-'+n, path:'demo/'+(n++)+'.jsonl',
+        start:ts[0], end:ts[ts.length-1], gaps:buildGaps(ts),
+        texts:[title], tools:{}, errs:cat==='bug'?2+Math.floor(rnd()*6):0, msgs:turns*2,
+        turns:[{ts:ts[0],cat:cat}],
+        sampled:false, auto:cat, cat:cat, forced:false, mix:null, title:title
+      });
+    }
+  }
+  S.sessions=out; S.demo=true; S.screen='result';
+  S.meta={files:out.length,bytes:0,sampled:0,ms:0};
+  render();
+}
+
+/* ============================================================
+   聚合
+   ============================================================ */
+function anchorTs(){
+  var mx=0;
+  for(var i=0;i<S.sessions.length;i++) if(S.sessions[i].end>mx) mx=S.sessions[i].end;
+  return Math.max(mx,Date.now());
+}
+function rangeMs(){
+  if(S.range==='all') return Infinity;
+  var d={'7':7,'30':30,'90':90}[S.range]||Infinity;
+  return d*86400000;
+}
+function visibleSessions(){
+  var cut=anchorTs()-rangeMs(), q=S.query.trim().toLowerCase();
+  return S.sessions.filter(function(s){
+    if(s.end<cut) return false;
+    if(q && (s.title+' '+(s.texts||[]).join(' ')).toLowerCase().indexOf(q)===-1) return false;
+    return true;
+  });
+}
+function aggregate(){
+  var list=visibleSessions();
+  var total=0, perCat={}, days={};
+  allCats().forEach(function(c){perCat[c.key]={ms:0,n:0};});
+  for(var i=0;i<list.length;i++){
+    var s=list[i], sum=0, mix={};
+    walkGaps(s,S.cap,S.breakMin,function(ms,cat,start){
+      sum+=ms; total+=ms; mix[cat]=(mix[cat]||0)+ms;
+      if(!perCat[cat]) perCat[cat]={ms:0,n:0};
+      perCat[cat].ms+=ms;
+      var k=dayKey(start);
+      if(!days[k]) days[k]={};
+      days[k][cat]=(days[k][cat]||0)+ms;
+    });
+    s._act=sum;
+    s.mix=mix;
+    if(!s.forced) s.cat=dominantCat(mix,s.auto);
+    if(!perCat[s.cat]) perCat[s.cat]={ms:0,n:0};
+    perCat[s.cat].n++;
+  }
+  return {list:list,total:total,perCat:perCat,days:days};
+}
+function dayTotal(o){ var t=0; for(var k in o) t+=o[k]; return t; }
+
+/* ============================================================
+   渲染
+   ============================================================ */
+function render(){
+  var app=$('#app');
+  if(S.screen==='scan') app.innerHTML=viewScan();
+  else app.innerHTML=viewResult();
+  bind();
+}
+
+/* 时间花在哪一类，就给你一个什么称号 */
+var TITLES={
+  work:  {t:'一个人撑起一条产线', s:'工作吃掉了大半时间，AI 在你手里基本等于第二个自己'},
+  env:   {t:'万事俱备型选手',     s:'时间主要花在开工前的准备上，磨刀不误砍柴工'},
+  skill: {t:'工具囤积症患者',     s:'技能越装越多，先把工具收齐了再说'},
+  bug:   {t:'修理铺老板',         s:'大半时间在跟报错打交道，修好一个又来一个'},
+  search:{t:'人形搜索引擎',       s:'什么都要先查清楚，信息收集得很全'},
+  img:   {t:'AI 美术总监',        s:'出图、改图、挑图，一张一张地抠'},
+  video: {t:'一个人扛下整个剧组', s:'写稿、配音、分镜、渲染，一条龙全是你'},
+  novel: {t:'深夜连载作者',       s:'大纲、人物、剧情，一章一章地磨'},
+  chat:  {t:'把 AI 当树洞的人',   s:'正经活没多少，主要是想找个人聊聊'}
+};
+
+function viewScan(){
+  return ''+
+  '<main data-k="paper"><div class="scan">'+
+    '<p class="eyebrow">Scanning</p>'+
+    '<h2>正在读你的会话记录</h2>'+
+    '<p class="note" style="margin-top:8px">只在本机浏览器里解析，不会发出任何网络请求。</p>'+
+    '<div class="bar-track"><div class="bar-fill" id="scanFill" style="width:0%"></div></div>'+
+    '<div class="scan-meta" id="scanMeta"><span>准备中…</span><span>0%</span></div>'+
+    '<div class="scan-file" id="scanFile"></div>'+
+  '</div></main>';
+}
+
+function fmtHoursCell(ms){
+  var h=ms/3600000;
+  var v=h>=100?h.toFixed(0):h.toFixed(1);
+  if(h<0.05) v='0';
+  return '<span class="h">'+v+'<small>h</small></span>';
+}
+
+function viewResult(){
+  var agg=aggregate();
+  var list=agg.list, total=agg.total, perCat=agg.perCat, days=agg.days;
+  var dayKeys=Object.keys(days).sort();
+  var activeDays=dayKeys.length;
+  var avg=activeDays? total/activeDays : 0;
+
+  // 堆叠条数据：按时长降序
+  var segs=allCats().map(function(c){return {key:c.key,name:c.name,color:c.color,light:c.light,ms:(perCat[c.key]||{ms:0}).ms,n:(perCat[c.key]||{n:0}).n};})
+    .filter(function(s){return s.ms>0 && (total? s.ms/total:0)>=0.004;})
+    .sort(function(a,b){return b.ms-a.ms;});
+  var accPct=0;
+  segs.forEach(function(s){s.pct=total? s.ms/total:0; s.center=(accPct+s.pct/2)*100; accPct+=s.pct;});
+
+  // 时间主要花在哪一类，标题就叫什么
+  var topSeg=segs.length? segs[0] : null;
+  var heroTitle=total? (TITLES[topSeg? topSeg.key:'work'] || {t:'满脑子都是「'+catOf(topSeg.key).name.replace('其他 · ','')+'」', s:'大部分时间都花在这一件事上'})
+                     : (S.sessions.length
+                        ? {t:'这段时间你没怎么用', s:'换个时间范围看看，或者右上角换一个目录'}
+                        : {t:'还没读到你的记录', s:'先选一个目录，看看这些时间都去哪了'});
+  var maxPct=topSeg? topSeg.pct : 0;
+
+  // KPI
+  var kpi=''+
+    '<div class="kpi"><div class="lab">AI 活跃时长</div><div class="val num">'+hText(total)+'<small>小时</small></div></div>'+
+    '<div class="kpi"><div class="lab">日均（按活动日）</div><div class="val num">'+fmtH(avg).toFixed(1)+'<small>小时</small></div></div>'+
+    '<div class="kpi"><div class="lab">会话数</div><div class="val num">'+list.length+'<small>次</small></div></div>'+
+    '<div class="kpi"><div class="lab">有活动的日子</div><div class="val num">'+activeDays+'<small>天</small></div></div>';
+
+  // 堆叠条
+  var barHtml=segs.map(function(s){
+    var txtColor=s.light?'#132b69':'#fbf8f5';
+    var showTxt=true;
+    return '<div class="seg-i" data-pct="'+(s.pct*100).toFixed(3)+'" data-name="'+esc(s.name)+'" data-dark="'+(s.light?'0':'1')+'" style="width:'+(s.pct*100).toFixed(3)+'%;background-color:'+s.color+'" title="'+esc(s.name)+'：'+fmtDur(s.ms)+'（'+Math.round(s.pct*100)+'%）">'+
+      ''+
+    '</div>';
+  }).join('');
+
+  // 手写标签
+  var handHtml=segs.map(function(s,i){
+    return '<div class="hand-wrap" data-center="'+s.center+'" data-lane="'+(i%2)+'" data-i="'+i+'">'+
+      '<div class="hand-label" data-fs="'+(s.name.length>8?31:36)+'" style="font-size:'+(s.name.length>8?31:36)+'px">'+esc(s.name)+'</div>'+
+    '</div>';
+  }).join('');
+
+  // 图例/表格
+  var rows=allCats().slice().sort(function(a,b){return (perCat[b.key]||{ms:0}).ms-(perCat[a.key]||{ms:0}).ms;}).map(function(c){
+    var d=perCat[c.key]||{ms:0,n:0}, pct=total? d.ms/total*100:0;
+    return '<div class="row">'+
+      '<span class="dot" style="background:'+c.color+'"></span>'+
+      '<span class="nm">'+esc(c.name)+'</span>'+
+      fmtHoursCell(d.ms)+
+      '<div class="mini"><i style="width:'+Math.max(pct,0.6).toFixed(1)+'%;background:'+c.color+'"></i></div>'+
+      '<span class="pc">'+Math.round(pct)+'%</span>'+
+      '<span class="ct">'+d.n+'次'+(d.n?' / 均'+fmtHShort(d.ms/d.n):'')+'</span>'+
+    '</div>';
+  }).join('');
+
+  // 最近 30 天
+  var dayStrip='';
+  var anchor=new Date(anchorTs()); anchor.setHours(0,0,0,0);
+  var maxDay=0;
+  var dayArr=[];
+  for(var i=29;i>=0;i--){
+    var dk=dayKey(anchor.getTime()-i*86400000);
+    var ms=days[dk]? dayTotal(days[dk]) : 0;
+    dayArr.push({k:dk,ms:ms,ts:anchor.getTime()-i*86400000});
+    if(ms>maxDay) maxDay=ms;
+  }
+  var maxH=Math.max(maxDay,3600000);
+  dayArr.forEach(function(d,idx){
+    var h=Math.max(2,d.ms/maxH*130);
+    var stack='';
+    var cats=days[d.k]||{};
+    Object.keys(cats).sort(function(a,b){return cats[b]-cats[a];}).forEach(function(k){
+      var pctOfDay=d.ms? cats[k]/d.ms*100 : 0;
+      stack+='<i style="height:'+pctOfDay.toFixed(1)+'%;background:'+catOf(k).color+'"></i>';
+    });
+    dayStrip+='<div class="day" title="'+d.k+' · '+fmtDur(d.ms)+'">'+
+      '<div class="stack" style="height:'+h.toFixed(0)+'px">'+stack+'</div>'+
+      '<span>'+(idx%5===0?dayLabel(d.ts):'')+'</span></div>';
+  });
+
+  // 会话列表
+  var sorted=list.slice().sort(function(a,b){
+    if(S.sort==='dur') return (b._act||0)-(a._act||0);
+    return b.end-a.end;
+  });
+  var cap=S.showAll? sorted.length : 60;
+  var sessHtml=sorted.slice(0,cap).map(function(s){
+    var open=!!S.expanded[s.id];
+    var opts=allCats().map(function(c){return '<option value="'+c.key+'"'+(c.key===s.cat?' selected':'')+'>'+esc(c.name)+'</option>';}).join('');
+    var preview=(s.texts||[]).slice(0,3).map(function(t){return '<div>· '+esc(t.slice(0,180))+'</div>';}).join('');
+    var tl=Object.keys(s.tools||{}).sort(function(a,b){return s.tools[b]-s.tools[a];}).slice(0,4).map(function(k){return esc(k)+'×'+s.tools[k];}).join('、');
+    var mixArr=Object.keys(s.mix||{}).map(function(k){return {k:k,ms:s.mix[k]};})
+      .sort(function(a,b){return b.ms-a.ms;}).slice(0,4);
+    var why=mixArr.length?('<div style="margin-top:4px"><b>时间构成：</b>'+mixArr.map(function(x){
+      return esc(catOf(x.k).name)+' '+fmtHShort(x.ms);
+    }).join('  ·  ')+'</div>'):'';
+    return '<div class="s-item'+(open?' open':'')+'" data-sid="'+esc(s.id)+'">'+
+      '<span class="d">'+dayLabel(s.end)+'</span>'+
+      '<span class="t" data-act="toggle">'+esc(s.title||'(无用户文本)')+'</span>'+
+      '<span class="edit"><select data-act="recat" data-sid="'+esc(s.id)+'" aria-label="修改分类">'+opts+'</select></span>'+
+      '<span class="dur">'+fmtHShort(s._act)+'</span>'+
+      '<span class="turns">'+s.msgs+' 条'+(s.sampled?'*':'')+'</span>'+
+      '<div class="s-detail">'+(preview||'<div>（这条会话里没有可读的用户文本）</div>')+
+        why+
+        (tl?'<div style="margin-top:6px"><b>常用工具：</b>'+tl+'</div>':'')+
+        (s.errs?'<div><b>报错次数：</b>'+s.errs+'</div>':'')+
+        '<div style="margin-top:6px;opacity:.6">'+esc(s.path)+'</div>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+
+  var sampledNote=S.meta.sampled? '（其中 '+S.meta.sampled+' 个超大文件采用首尾采样，中段的空闲判定可能有偏差）':'';
+
+  return ''+
+  '<header class="topbar"><div class="wrap">'+
+    '<span class="brand">AI 时间都去哪了</span>'+
+    '<span class="seg" role="group" aria-label="时间范围">'+
+      ['all','90','30','7'].map(function(r){
+        var lab={'all':'全部','90':'近90天','30':'近30天','7':'近7天'}[r];
+        return '<button data-act="range" data-range="'+r+'" aria-pressed="'+(S.range===r)+'">'+lab+'</button>';
+      }).join('')+
+    '</span>'+
+    '<span class="spacer"></span>'+
+    '<button class="icon-btn" data-act="share">分享</button>'+
+    '<button class="icon-btn hide-sm" data-act="export-json">导出 JSON</button>'+
+    '<button class="icon-btn'+(S.demo?' primary-ghost':'')+'" data-act="pick">'+(S.demo?'选择目录':'换个目录')+'</button>'+
+  '</div></header>'+
+  '<main data-k="paper"><div class="wrap" style="padding-bottom:40px">'+
+    '<section class="hero">'+
+      '<p class="eyebrow">Where my AI hours go</p>'+
+      '<h1>'+esc(heroTitle.t)+'</h1>'+
+      '<p class="lede">'+esc(heroTitle.s)+(total?' · 占 '+Math.round(maxPct*100)+'% 的时间':'')+'</p>'+
+      '<p class="lede" style="margin-top:6px;font-size:13px;opacity:.75">'+(S.demo
+        ? '下面是示例数据（'+S.sessions.length+' 段虚构会话）'
+        : (S.meta.files+' 个会话文件'+(S.meta.bytes?' · '+(S.meta.bytes/1048576).toFixed(0)+' MB':'')+' · 解析耗时 '+(S.meta.ms/1000).toFixed(1)+' 秒'+sampledNote))+'</p>'+
+    '</section>'+
+    (S.demo?'<div class="stem"><div class="stem-txt"><b>想看你自己的？</b>点右上角「选择目录」，选到 <code>.workbuddy\\projects</code>（Windows）<span class="pv-mac">或 <code>~/.workbuddy/projects</code></span>。全程本地解析，不上传一个字。</div><button class="btn btn-primary stem-btn" data-act="pick">选择目录 →</button></div>':'')+
+    (S.error?'<div class="alert" style="margin-top:16px">'+esc(S.error)+'</div>':'')+
+    '<div class="kpis">'+kpi+'</div>'+
+    '<section class="stage" id="stage">'+
+      '<div class="bar" id="heroBar">'+barHtml+'</div>'+
+      '<div class="pcts" id="pcts"></div>'+
+      '<svg class="leads" id="leads"></svg>'+
+      handHtml+
+    '</section>'+
+    '<section class="legend">'+
+      '<div class="row head"><span></span><span>分类</span><span style="text-align:right">时长</span><span></span><span style="text-align:right">占比</span><span style="text-align:right">会话</span></div>'+
+      rows+
+    '</section>'+
+    '<section class="panel">'+
+      '<h2>最近 30 天</h2>'+
+      '<p class="hint">每天一根柱子，颜色就是当天的分类构成。空白的日子是真没在用（不是加载失败）。</p>'+
+      '<div class="days">'+dayStrip+'</div>'+
+    '</section>'+
+    '<section class="panel">'+
+      '<h2>会话明细</h2>'+
+      '<p class="hint">分类是本地规则判的，约 75% 准。判错了直接下拉改，改完立刻重算，并记在这台电脑上。</p>'+
+      '<div class="tools">'+
+        '<label class="field"><input type="search" id="q" placeholder="搜会话内容…" value="'+esc(S.query)+'" /></label>'+
+        '<div class="seg">'+
+          '<button data-act="sort" data-sort="dur" aria-pressed="'+(S.sort==='dur')+'">按时长</button>'+
+          '<button data-act="sort" data-sort="time" aria-pressed="'+(S.sort==='time')+'">按时间</button>'+
+        '</div>'+
+        '<span style="font-size:12.5px;color:#132b6985">共 '+list.length+' 条</span>'+
+      '</div>'+
+      '<div class="sess">'+(sessHtml||'<p class="note">没有匹配的会话。</p>')+'</div>'+
+      (sorted.length>60&&!S.showAll?'<p class="more"><button class="icon-btn" data-act="showall">展开全部 '+sorted.length+' 条</button></p>':'')+
+    '</section>'+
+    '<section class="panel">'+
+      '<h2>口径</h2>'+
+      '<p class="hint">这里算的不是「窗口开了多久」，而是「你真正在跟它来回折腾了多久」：把相邻两条消息的间隔加起来，单段最多算 <b id="capTxt">'+S.cap+'</b> 分钟；间隔超过 <b id="breakTxt">'+S.breakMin+'</b> 分钟就当你人走了，那段时间不计入。</p>'+
+      '<p class="hint">分类是<b>按每一轮分别判</b>的：一条会话里先装环境、后做视频，时间会分别记到两类名下，不会整条贴一个标签。会话明细里能看到它的「时间构成」。</p>'+
+      '<div class="sliders">'+
+        '<div class="slider"><label>单段间隔封顶 <span id="capVal">'+S.cap+' 分钟</span></label><input type="range" min="1" max="20" step="1" value="'+S.cap+'" data-act="cap" /></div>'+
+        '<div class="slider"><label>离开判定 <span id="breakVal">'+S.breakMin+' 分钟</span></label><input type="range" min="10" max="120" step="5" value="'+S.breakMin+'" data-act="break" /></div>'+
+      '</div>'+
+    '</section>'+
+    '<footer class="foot">'+
+      '<div><b>数据来源</b>：你授权的 <code>.workbuddy/projects</code> 下 <code>*.jsonl</code> 会话文件。子代理的中间输出（<code>.txt</code>）、缓存、日志一律不读。</div>'+
+      '<div><b>隐私</b>：解析全部发生在当前浏览器标签页内，没有任何网络请求。关掉页面，数据就没了；只有「分类修正」和这两根滑杆会存进 localStorage。</div>'+
+      '<div><b>已知偏差</b>：分类靠关键词 + 工具调用特征，遇到跨类任务会判错；超大会话用首尾采样，中段空闲可能低估；空闲阈值是人为设定，数字可以按滑杆调。</div>'+
+    '</footer>'+
+  '</div></main>';
+}
+
+/* 手写标签 + 引线布局
+   思路：标签不必居中在所属分段上——引线可以斜着连。
+   同一条车道内从左到右依次排布，整体放不下就先缩字号，绝不丢标签。 */
+function layoutHero(){
+  var stage=$('#stage'), bar=$('#heroBar'), svg=$('#leads');
+  if(!stage||!bar||!svg) return;
+  var W=bar.clientWidth;
+  var wraps=[].slice.call(stage.querySelectorAll('.hand-wrap'));
+  if(!W||!wraps.length) return;
+  if(window.innerWidth<=700){ svg.innerHTML=''; return; }   // 手机上用手写标签会打架，直接不画
+
+  var BAR_TOP=126, BAR_H=112, BAR_BOT=BAR_TOP+BAR_H;
+  var LANE_Y=[32,250], GAP=18, PAD=6;
+
+  var items=wraps.map(function(w,i){
+    var lab=w.querySelector('.hand-label');
+    w.style.display='';
+    var fs=parseFloat(lab.dataset.fs)||36;
+    lab.style.fontSize=fs+'px';
+    return {el:w,lab:lab,fs:fs,center:(parseFloat(w.dataset.center)/100)*W,lane:i%2};
+  });
+
+  [0,1].forEach(function(ln){
+    var g=items.filter(function(it){return it.lane===ln;}).sort(function(a,b){return a.center-b.center;});
+    if(!g.length) return;
+
+    // 整体宽度超了就等比缩字号，最多缩到 17px
+    var scale=1;
+    for(var k=0;k<7;k++){
+      g.forEach(function(it){it.lab.style.fontSize=Math.max(17,Math.round(it.fs*scale))+'px';it.w=it.lab.offsetWidth||60;});
+      var total=g.reduce(function(a,it){return a+it.w;},0)+(g.length-1)*GAP;
+      if(total<=W-PAD*2) break;
+      scale*=0.9;
+    }
+
+    // 从左往右排：优先贴近自己的分段中心，挤不下就右移
+    var cursor=PAD;
+    g.forEach(function(it){
+      it.x=Math.max(it.center,cursor+it.w/2);
+      cursor=it.x+it.w/2+GAP;
+    });
+    // 右侧越界 -> 整体左推
+    var right=g[g.length-1].x+g[g.length-1].w/2;
+    var over=right-(W-PAD);
+    if(over>0) g.forEach(function(it){it.x-=over;});
+    // 左推后若左越界，再把整组顶回来（此时靠缩字号已保证放得下）
+    var left=g[0].x-g[0].w/2;
+    if(left<PAD){ var push=PAD-left; g.forEach(function(it){it.x+=push;}); }
+  });
+
+  svg.setAttribute('viewBox','0 0 '+W+' 340');
+  svg.setAttribute('width',W); svg.setAttribute('height',340);
+  var paths='';
+  items.forEach(function(p){
+    if(p.el.style.display==='none') return;
+    p.el.style.transform='translate('+(p.x-p.w/2).toFixed(1)+'px,'+LANE_Y[p.lane]+'px)';
+    var lh=p.lab.offsetHeight||40;
+    var y0,y1;
+    if(p.lane===0){ y0=LANE_Y[0]+lh+1; y1=BAR_TOP; }
+    else { y0=LANE_Y[1]-2; y1=BAR_BOT; }
+    var dy=(y1-y0)*0.55;
+    paths+='<path d="M '+p.x.toFixed(1)+' '+y0.toFixed(1)+' C '+p.x.toFixed(1)+' '+(y0+dy).toFixed(1)+', '
+      +(p.x+(p.center-p.x)*0.55).toFixed(1)+' '+(y1-dy).toFixed(1)+', '+p.center.toFixed(1)+' '+y1.toFixed(1)+'"/>';
+  });
+  svg.innerHTML=paths;
+}
+
+/* 百分比：单独一层浮层来画，字号一律相同。
+   色块放得下就压在色块里；放不下就**不画**，改成拼在分类名称后面，
+   形如「搭建运行环境, 5%」。柱子始终占满整行，不做右侧留白。 */
+function layoutPcts(){
+  var stage=$('#stage'), bar=$('#heroBar'), layer=$('#pcts');
+  if(!stage||!bar||!layer) return;
+
+  layer.innerHTML='';
+  var barRect=bar.getBoundingClientRect();
+  var stRect=stage.getBoundingClientRect();
+  var ox=barRect.left-stRect.left, oy=barRect.top-stRect.top;
+  var H=barRect.height;
+
+  var segs=[].slice.call(bar.querySelectorAll('.seg-i'));
+  var wraps=[].slice.call(stage.querySelectorAll('.hand-wrap'));
+  if(!segs.length) return;
+
+  segs.forEach(function(seg,i){
+    var r=seg.getBoundingClientRect();
+    var pct=Math.round(parseFloat(seg.dataset.pct)||0);
+    var dark=seg.dataset.dark==='1';
+
+    var el=document.createElement('span');
+    el.className='pct';
+    el.innerHTML=pct+'<i>%</i>';
+    el.style.color=dark?'#fbf8f5':'#132b69';
+    layer.appendChild(el);
+
+    var fits=(el.offsetWidth+16)<=r.width;
+    if(fits){
+      el.style.left=(r.left-barRect.left+ox+10)+'px';
+      el.style.top=(oy+H-10-26)+'px';
+    }else{
+      el.remove();
+    }
+
+    // 放不下 -> 把百分比接到分类名后面
+    var wrap=wraps[i];
+    if(wrap){
+      var lab=wrap.querySelector('.hand-label');
+      var nm=seg.dataset.name||'';
+      lab.textContent = fits? nm : nm+', '+pct+'%';
+    }
+  });
+
+  if(window.innerWidth>700) layoutHero();
+}
+
+/* ============================================================
+   分享：把「称号 + 描述 + 时间条」画成一张图
+   ============================================================ */
+function roundRect(ctx,x,y,w,h,r){
+  r=Math.min(r,w/2,h/2);
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.lineTo(x+w-r,y); ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r); ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  ctx.lineTo(x+r,y+h); ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+  ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y);
+  ctx.closePath();
+}
+function fitText(ctx,txt,max,size,family,weight){
+  var s=size;
+  do{
+    ctx.font=(weight||'700')+' '+s+'px '+family;
+    if(ctx.measureText(txt).width<=max) break;
+    s-=2;
+  }while(s>18);
+  return s;
+}
+function toast(msg){
+  var d=document.getElementById('toast');
+  if(!d){ d=document.createElement('div'); d.id='toast'; document.body.appendChild(d); }
+  d.textContent=msg;
+  d.className='toast show';
+  clearTimeout(d._t);
+  d._t=setTimeout(function(){ d.className='toast'; },2600);
+}
+
+function shareCard(){
+  var agg=aggregate();
+  if(!agg.total){ toast('还没有数据，先选个目录吧'); return; }
+  var segs=allCats().map(function(c){
+    var d=agg.perCat[c.key]||{ms:0,n:0};
+    return {key:c.key,name:c.name,color:c.color,light:c.light,ms:d.ms,pct:d.ms/agg.total};
+  }).filter(function(s){ return s.ms>0 && s.pct>=0.004; }).sort(function(a,b){ return b.ms-a.ms; });
+
+  var top=segs[0];
+  var t=TITLES[top.key] || {t:'满脑子都是「'+String(catOf(top.key).name).replace('其他 · ','')+'」', s:'大部分时间都花在这一件事上'};
+  var pctTxt=Math.round(top.pct*100)+'%';
+
+  var W=1200,H=700,SC=2;
+  var cv=document.createElement('canvas');
+  cv.width=W*SC; cv.height=H*SC;
+  var g=cv.getContext('2d');
+  g.scale(SC,SC);
+
+  // 纸张底 + 网格
+  g.fillStyle='#fbf8f5'; g.fillRect(0,0,W,H);
+  g.strokeStyle='rgba(19,43,105,.05)'; g.lineWidth=1;
+  for(var gx=0;gx<=W;gx+=28){ g.beginPath(); g.moveTo(gx+.5,0); g.lineTo(gx+.5,H); g.stroke(); }
+  for(var gy=0;gy<=H;gy+=28){ g.beginPath(); g.moveTo(0,gy+.5); g.lineTo(W,gy+.5); g.stroke(); }
+
+  var PAD=72, CW=W-PAD*2;
+  var sans='"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif';
+  var hand='"Long Cang","华文行楷","STXingkai","KaiTi","楷体",serif';
+  var num='"Khand","Bahnschrift","Arial Narrow",sans-serif';
+
+  // 顶部英文小标
+  g.fillStyle='#d04e00';
+  g.font='500 17px '+num;
+  g.letterSpacing='4px';
+  g.fillText('WHERE MY AI HOURS GO', PAD, 96);
+  g.letterSpacing='0px';
+
+  // 称号
+  g.fillStyle='#132b69';
+  var ts=fitText(g,t.t,CW,76,sans,'900');
+  g.font='900 '+ts+'px '+sans;
+  g.fillText(t.t, PAD, 188);
+
+  // 描述（占比并进同一句，别在右上角单飘一个数字）
+  g.font='400 25px '+sans;
+  var sub=(t.s? t.s+' · ':'')+'占 '+pctTxt+' 的时间';
+  while(g.measureText(sub).width>CW && sub.length>8) sub=sub.slice(0,-2);
+  g.fillStyle='rgba(19,43,105,.66)';
+  g.fillText(sub, PAD, 238);
+
+  // 时间条
+  var barY=302, barH=104, acc=0;
+  segs.forEach(function(s,i){
+    var w=s.pct*CW;
+    g.save();
+    if(i===0||i===segs.length-1){
+      g.beginPath();
+      if(segs.length===1){ roundRect(g,PAD+acc,barY,w,barH,16); }
+      else if(i===0){
+        g.moveTo(PAD+acc+16,barY); g.lineTo(PAD+acc+w,barY);
+        g.lineTo(PAD+acc+w,barY+barH); g.lineTo(PAD+acc+16,barY+barH);
+        g.quadraticCurveTo(PAD+acc,barY+barH,PAD+acc,barY+barH-16);
+        g.lineTo(PAD+acc,barY+16);
+        g.quadraticCurveTo(PAD+acc,barY,PAD+acc+16,barY);
+        g.closePath();
+      }else{
+        g.moveTo(PAD+acc,barY); g.lineTo(PAD+acc+w-16,barY);
+        g.quadraticCurveTo(PAD+acc+w,barY,PAD+acc+w,barY+16);
+        g.lineTo(PAD+acc+w,barY+barH-16);
+        g.quadraticCurveTo(PAD+acc+w,barY+barH,PAD+acc+w-16,barY+barH);
+        g.lineTo(PAD+acc,barY+barH);
+        g.closePath();
+      }
+      g.clip();
+    }
+    g.fillStyle=s.color;
+    g.fillRect(PAD+acc,barY,w,barH);
+    // 斜纹
+    g.globalAlpha=.07; g.fillStyle='#fff';
+    for(var k=-barH;k<w;k+=22){ g.beginPath(); g.moveTo(PAD+acc+k,barY+barH); g.lineTo(PAD+acc+k+barH,barY); g.lineTo(PAD+acc+k+barH+10,barY); g.lineTo(PAD+acc+k+10,barY+barH); g.fill(); }
+    g.globalAlpha=1;
+    g.restore();
+
+    // 段内百分比
+    var label=Math.round(s.pct*100)+'%';
+    g.font='700 40px '+num;
+    if(g.measureText(label).width+24<w){
+      g.fillStyle=s.light?'#132b69':'#fbf8f5';
+      g.fillText(label, PAD+acc+16, barY+barH-18);
+    }
+    acc+=w;
+  });
+
+  // 图例：两行三列
+  var colW=CW/3, ly=barY+barH+52, rowH=44;
+  var numFont='700 26px '+num, nameFont='400 30px '+hand;
+  segs.forEach(function(s,i){
+    var col=i%3, row=Math.floor(i/3);
+    var lx=PAD+col*colW, lyy=ly+row*rowH;
+    g.beginPath(); g.arc(lx+7,lyy-8,7,0,Math.PI*2); g.fillStyle=s.color; g.fill();
+    g.fillStyle='#132b69'; g.font=nameFont;
+    var nm=s.name;
+    g.fillText(nm, lx+24, lyy);
+    var nw=g.measureText(nm).width;
+    g.font='700 24px '+num;
+    g.fillStyle='rgba(19,43,105,.55)';
+    g.fillText(Math.round(s.pct*100)+'%', lx+24+nw+14, lyy);
+  });
+
+  // 底部一行
+  g.font='400 19px '+sans;
+  g.fillStyle='rgba(19,43,105,.42)';
+  var d=new Date();
+  var stamp=d.getFullYear()+'.'+pad(d.getMonth()+1)+'.'+pad(d.getDate());
+  g.fillText('AI 时间都去哪了  ·  '+segs.length+' 个去处  ·  '+stamp, PAD, H-30);
+  g.textAlign='right';
+  g.fillText(Math.round(agg.total/3600000)+' 小时', W-PAD, H-30);
+  g.textAlign='left';
+
+  cv.toBlob(function(blob){
+    if(!blob){ toast('图片生成失败'); return; }
+    var name='ai-time-'+dayKey(Date.now())+'.png';
+    var file=null;
+    try{ file=new File([blob],name,{type:'image/png'}); }catch(e){}
+    var canShare=false;
+    try{ canShare=!!(file && navigator.canShare && navigator.canShare({files:[file]})); }catch(e){ canShare=false; }
+    if(canShare){
+      try{ navigator.share({files:[file],title:'AI 时间都去哪了'}).catch(function(){}); return; }catch(e){}
+    }
+    var a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download=name;
+    a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); },3000);
+    toast('分享图已保存到下载文件夹');
+  },'image/png');
+}
+
+/* ============================================================
+   事件
+   ============================================================ */
+function bind(){
+  var app=$('#app');
+  app.onclick=function(e){
+    var t=e.target.closest('[data-act]');
+    if(!t) return;
+    var act=t.dataset.act;
+    if(act==='pick'){pickFolder();}
+    else if(act==='demo'){demoData();}
+    else if(act==='range'){S.range=t.dataset.range;saveSettings();render();}
+    else if(act==='sort'){S.sort=t.dataset.sort;render();}
+    else if(act==='showall'){S.showAll=true;render();}
+    else if(act==='toggle'){
+      var item=t.closest('.s-item'); var sid=item.dataset.sid;
+      S.expanded[sid]=!S.expanded[sid]; item.classList.toggle('open');
+    }
+    else if(act==='export-json'){exportJSON();}
+    else if(act==='share'){shareCard();}
+  };
+  var sel=app.querySelectorAll('[data-act=recat]');
+  for(var i=0;i<sel.length;i++){
+    sel[i].onchange=function(){
+      var sid=this.dataset.sid, val=this.value;
+      var s=S.sessions.filter(function(x){return x.id===sid;})[0];
+      if(s){s.cat=val;s.forced=true;OVERRIDE[sid]=val;try{localStorage.setItem(LS_OVERRIDE,JSON.stringify(OVERRIDE));}catch(e){}}
+      render();
+    };
+  }
+  var q=$('#q');
+  if(q){
+    var timer=null;
+    q.oninput=function(){
+      S.query=this.value;
+      clearTimeout(timer);
+      timer=setTimeout(function(){
+        var pos=S.query; render();
+        var el2=$('#q'); if(el2){el2.focus(); el2.setSelectionRange(pos.length,pos.length);}
+      },260);
+    };
+  }
+  var capR=app.querySelector('[data-act=cap]');
+  if(capR){
+    capR.oninput=function(){
+      var v=+this.value;
+      S.cap=v; saveSettings();
+      var a=$('#capVal'), b=$('#capTxt');
+      if(a) a.textContent=v+' 分钟';
+      if(b) b.textContent=v;
+    };
+    // 松手才重算，避免重建 DOM 打断拖动
+    capR.onchange=function(){ render(); };
+  }
+  var brkR=app.querySelector('[data-act=break]');
+  if(brkR){
+    brkR.oninput=function(){
+      var v=+this.value;
+      S.breakMin=v; saveSettings();
+      var a=$('#breakVal'), b=$('#breakTxt');
+      if(a) a.textContent=v+' 分钟';
+      if(b) b.textContent=v;
+    };
+    brkR.onchange=function(){ render(); };
+  }
+  if(S.screen==='result'){ requestAnimationFrame(function(){layoutHero();layoutPcts();}); }
+}
+
+/* 滑杆松手后由 bind 里的 onchange 触发整页重算 */
+
+function exportJSON(){
+  var agg=aggregate();
+  var data={
+    generatedAt:new Date().toISOString(),
+    range:S.range,
+    settings:{capMin:S.cap,breakMin:S.breakMin},
+    totals:{activeMs:agg.total,sessions:agg.list.length,categories:{}},
+    sessions:agg.list.map(function(s){
+      return {id:s.id,start:new Date(s.start).toISOString(),end:new Date(s.end).toISOString(),
+        category:s.cat,autoCategory:s.auto,activeMs:s._act,msgs:s.msgs,errors:s.errs,
+        sampled:s.sampled,title:s.title};
+    })
+  };
+  allCats().forEach(function(c){
+    if(!agg.perCat[c.key]) return;
+    data.totals.categories[c.key]={name:c.name,ms:agg.perCat[c.key].ms,sessions:agg.perCat[c.key].n};
+  });
+  var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='ai-time-report-'+dayKey(Date.now())+'.json';
+  a.click();
+  setTimeout(function(){URL.revokeObjectURL(a.href);},2000);
+}
+
+/* 原生目录选择 */
+var pickInput=$('#pick');
+if(pickInput){
+  pickInput.addEventListener('change',function(){
+    if(this.files&&this.files.length) handleInputFiles(this.files);
+    this.value='';
+  });
+}
+
+/* 拖拽文件夹 */
+['dragenter','dragover'].forEach(function(ev){
+  document.addEventListener(ev,function(e){e.preventDefault();});
+});
+document.addEventListener('drop',function(e){
+  e.preventDefault();
+  var items=e.dataTransfer&&e.dataTransfer.items;
+  if(!items||!items.length) return;
+  var entries=[];
+  var pending=[];
+  for(var i=0;i<items.length;i++){
+    var it=items[i];
+    if(it.kind!=='file') continue;
+    var entry=it.webkitGetAsEntry&&it.webkitGetAsEntry();
+    if(entry) pending.push(walkEntry(entry,entries));
+  }
+  if(!pending.length) return;
+  S.screen='scan';S.total=0;S.scanned=0;S.currentFile='正在读取文件夹…';render();
+  Promise.all(pending).then(function(){
+    if(!entries.length){S.error='拖进来的东西里没找到会话文件（*.jsonl）。请拖 .workbuddy\\projects 这个文件夹。';S.screen='result';render();return;}
+    scanEntries(entries);
+  });
+});
+function walkEntry(entry,out){
+  return new Promise(function(res){
+    if(entry.isFile){
+      entry.file(function(f){out.push({file:f,path:entry.fullPath.replace(/^\//,'')});res();},function(){res();});
+      return;
+    }
+    if(entry.isDirectory){
+      if(/^(node_modules|\.git|cache|binaries|blobs|vendor|logs|traces)$/.test(entry.name)){res();return;}
+      var reader=entry.createReader();
+      (function readBatch(){
+        reader.readEntries(function(ents){
+          if(!ents.length){res();return;}
+          var jobs=ents.map(function(en){return walkEntry(en,out);});
+          Promise.all(jobs).then(readBatch,readBatch);
+        },function(){res();});
+      })();
+      return;
+    }
+    res();
+  });
+}
+
+window.addEventListener('resize',function(){
+  if(S.screen==='result'){clearTimeout(window._rz);window._rz=setTimeout(function(){layoutHero();layoutPcts();},120);}
+});
+
+/* 启动：先直接给示例数据，用户点「选择目录」再换成自己的 */
+window.__AITIME__=S;   // 便于调试与二次开发
+demoData();
+})();
+</script>
+</body>
+</html>

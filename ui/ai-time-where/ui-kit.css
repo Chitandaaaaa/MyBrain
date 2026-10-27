@@ -1,0 +1,207 @@
+/* ============================================================
+   AI 时间都去哪了 · UI Kit
+   从 https://ai-time-where.app.workbuddy.host/ 提取的可复用设计系统
+   ------------------------------------------------------------
+   风格定位：中文复古印刷 / 丝网印（Risograph）+ 网格纸 + 手写批注
+   特点：无框架纯手写 CSS，纸底(#fbf8f5) + 藏青墨(#132b69)
+        单点高饱和橘(#d04e00)做唯一行动色，按钮用「硬投影」做印刷立体感
+   ============================================================ */
+
+/* ---------- 本地字体（Khand / Hind，latin 子集） ---------- */
+@font-face{font-family:'Khand';font-style:normal;font-weight:500;font-display:swap;
+  src:url('fonts/khand-500-latin-ext.woff2') format('woff2');
+  unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;}
+@font-face{font-family:'Khand';font-style:normal;font-weight:500;font-display:swap;
+  src:url('fonts/khand-500-latin.woff2') format('woff2');
+  unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
+@font-face{font-family:'Khand';font-style:normal;font-weight:700;font-display:swap;
+  src:url('fonts/khand-700-latin-ext.woff2') format('woff2');
+  unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;}
+@font-face{font-family:'Khand';font-style:normal;font-weight:700;font-display:swap;
+  src:url('fonts/khand-700-latin.woff2') format('woff2');
+  unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
+@font-face{font-family:'Hind';font-style:normal;font-weight:400;font-display:swap;
+  src:url('fonts/hind-400-latin-ext.woff2') format('woff2');
+  unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;}
+@font-face{font-family:'Hind';font-style:normal;font-weight:400;font-display:swap;
+  src:url('fonts/hind-400-latin.woff2') format('woff2');
+  unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
+@font-face{font-family:'Hind';font-style:normal;font-weight:600;font-display:swap;
+  src:url('fonts/hind-600-latin-ext.woff2') format('woff2');
+  unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;}
+@font-face{font-family:'Hind';font-style:normal;font-weight:600;font-display:swap;
+  src:url('fonts/hind-600-latin.woff2') format('woff2');
+  unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
+
+/* ---------- 设计令牌 ---------- */
+:root{
+  /* 主色板：只有 5 个色，克制是关键 */
+  --paper:#fbf8f5;   /* 纸底（暖白，不用纯白） */
+  --ink:#132b69;     /* 藏青墨（正文与所有描边，不用纯黑） */
+  --orange:#d04e00;  /* 焦橘（唯一行动色） */
+  --deep:#a00e00;    /* 深枣红（按钮硬投影 / 危险提示） */
+  --yellow:#f6c200;  /* 芥末黄（高亮 / 聚焦环 / 渐变尾） */
+  --line:#132b691a;  /* 墨色 10% 分割线 */
+  --card:#ffffff;
+
+  /* 分类色（9 类，低饱和印刷色，非霓虹） */
+  --c-chat:#e58aa6; --c-bug:#a00e00;  --c-env:#d04e00;
+  --c-skill:#f6c200;--c-search:#0086a8;--c-img:#5f8f3e;
+  --c-video:#7b4fa3;--c-novel:#8a6d3b;--c-work:#132b69;
+
+  /* 字体：三套各司其职 */
+  --numf:'Khand','Bahnschrift','Arial Narrow','Oswald',ui-sans-serif,sans-serif;      /* 数字/英文小标 */
+  --hand:'Long Cang','华文行楷','STXingkai','Xingkai SC','KaiTi','楷体','STKaiti','Kaiti SC',cursive; /* 手写中文标签 */
+  --sc:'Noto Sans SC','PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;   /* 中文正文/标题 */
+
+  /* 圆角与阴影：圆角大、阴影薄（靠 inset 1px 描边而非投影） */
+  --r-card:22px; --r-panel:20px; --r-kpi:16px; --r-row:13px; --r-pill:999px;
+}
+
+/* ---------- 基础 ---------- */
+*,*::before,*::after{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}
+html,body{height:100%}
+body{
+  margin:0;overflow-x:hidden;
+  background:var(--paper);color:var(--ink);
+  font-family:Hind,var(--sc),-apple-system,'Segoe UI',sans-serif;
+  -webkit-font-smoothing:antialiased;
+  font-feature-settings:'tnum';
+}
+/* 网格纸底纹：28px 方格，墨色 5% —— 这套 UI 的灵魂之一 */
+.paper{
+  min-height:100dvh;
+  background-color:var(--paper);
+  background-image:
+    linear-gradient(#132b690d 1px,transparent 1px),
+    linear-gradient(90deg,#132b690d 1px,transparent 1px);
+  background-size:28px 28px;
+}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+input,select{font:inherit;color:inherit}
+a{color:inherit}
+.wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+
+/* ---------- 排版工具类 ---------- */
+.num{font-family:var(--numf);font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:.01em}
+.hand{font-family:var(--hand);line-height:1}
+/* 英文小标：Khand + 极宽字距 + 大写，复古画册感 */
+.eyebrow{font-family:var(--numf);text-transform:uppercase;letter-spacing:.3em;font-size:15px;font-weight:500;color:var(--orange)}
+/* 大标题：Noto Sans SC 900 + 负字距，扎实不飘 */
+h1,h2,h3{font-family:var(--sc);font-weight:900;letter-spacing:-.02em}
+.title-xl{font-size:clamp(38px,6vw,60px);line-height:1.05;margin:10px 0 0}
+.title-lg{font-size:clamp(30px,4.4vw,46px);line-height:1.1;margin:6px 0 0}
+.sub{margin:18px 0 0;font-size:16px;line-height:1.75;color:#132b69cc;max-width:46em}
+.lede{margin:10px 0 0;font-size:14.5px;color:#132b69a6}
+.note{margin:14px 0 0;font-size:13px;line-height:1.7;color:#132b6980}
+
+/* ---------- 按钮：硬投影 = 印刷立体感 ---------- */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:9px;
+  border-radius:var(--r-pill);font-weight:700;
+  padding:15px 26px;font-size:16px;
+  transition:transform .12s,box-shadow .12s,background .12s;
+}
+.btn-primary{background:var(--orange);color:var(--paper);box-shadow:0 4px 0 var(--deep)}
+.btn-primary:hover{background:#e05600}
+/* 关键交互：按下时整体下沉 4px、投影归零，模拟真实按压 */
+.btn-primary:active{transform:translateY(4px);box-shadow:none}
+.btn-ghost{background:#fff;box-shadow:inset 0 0 0 1px #132b6930}
+.btn-ghost:hover{box-shadow:inset 0 0 0 1px #132b6960,0 2px 8px #132b691a}
+.btn:focus-visible{outline:3px solid var(--yellow);outline-offset:3px}
+.btn-sm{padding:10px 18px;font-size:14px}
+
+/* ---------- 卡片 / 面板 ---------- */
+.card{
+  background:#ffffffd9;
+  border-radius:var(--r-card);
+  box-shadow:0 1px 0 #132b6922,0 18px 40px -28px #132b6940;
+  padding:26px 26px 24px;
+}
+.panel{
+  background:#ffffffb3;border-radius:var(--r-panel);padding:22px 24px;
+  box-shadow:inset 0 0 0 1px #132b6912;
+}
+.panel h2{font-size:17px;margin:0}
+.panel .hint{font-size:12.5px;color:#132b6985;margin:5px 0 0;line-height:1.6}
+
+/* ---------- 分隔圆点清单 ---------- */
+.chips{display:flex;flex-wrap:wrap;margin:0;padding:0;list-style:none;font-size:12.5px;font-weight:500;color:#132b698c}
+.chips li{display:inline-flex;align-items:center}
+.chips li::after{content:'·';margin:0 9px;color:#132b6947}
+.chips li:last-child::after{content:'';margin:0}
+
+/* ---------- 分段控件（segmented control） ---------- */
+.seg{display:inline-flex;background:#132b690d;border-radius:var(--r-pill);padding:3px}
+.seg button{padding:6px 13px;border-radius:var(--r-pill);font-size:13px;font-weight:600;color:#132b69a0}
+.seg button[aria-pressed=true]{background:#fff;color:var(--ink);box-shadow:0 1px 3px #132b6926}
+
+/* ---------- 胶囊小按钮 ---------- */
+.icon-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:var(--r-pill);font-size:13.5px;font-weight:600;box-shadow:inset 0 0 0 1px #132b6930}
+.icon-btn:hover{background:#fff}
+
+/* ---------- KPI 数字卡：Khand 大数字是这套设计的记忆点 ---------- */
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.kpi{background:#ffffffcc;border-radius:var(--r-kpi);padding:16px 18px;box-shadow:inset 0 0 0 1px #132b6914}
+.kpi .lab{font-size:12.5px;color:#132b6990;font-weight:600}
+.kpi .val{font-size:40px;line-height:1.1;margin-top:4px;display:flex;align-items:baseline;gap:4px}
+.kpi .val small{font-size:15px;font-weight:600;font-family:Hind,sans-serif;opacity:.65}
+
+/* ---------- 堆叠条：横向 100% 构成 ---------- */
+/* ⚠️ 关键坑：给 .seg-i 设颜色必须用 background-color，绝不能用 background 简写。
+   background 会把这里 background-image 的斜纹重置成 none，斜纹和流动动画会静默消失。
+   原站 JS 里就是 style="background-color:'+color+'" 这样拼的。 */
+.stage{position:relative;margin:34px 0 0;height:340px}
+.bar{position:absolute;left:0;right:0;top:126px;height:112px;display:flex;filter:drop-shadow(0 10px 0 #132b6914)}
+.seg-i{
+  position:relative;height:100%;overflow:hidden;
+  background-image:repeating-linear-gradient(115deg,rgba(255,255,255,.07) 0 10px,transparent 10px 22px);
+  background-size:200% 100%;animation:drift 18s linear infinite;
+  transition:width .5s cubic-bezier(.2,.9,.3,1.2);
+}
+@keyframes drift{to{background-position:-400px 0}}
+.seg-i:first-child{border-radius:14px 0 0 14px}
+.seg-i:last-child{border-radius:0 14px 14px 0}
+.seg-i:only-child{border-radius:14px}
+.seg-i:hover{filter:brightness(1.06)}
+/* 斜纹遮罩：让大色块不死板，且会缓慢流动 */
+
+/* ---------- 图例表格行 ---------- */
+.legend{display:grid;gap:8px}
+.row{
+  display:grid;grid-template-columns:14px 1.3fr 88px 1fr 62px 96px;align-items:center;gap:14px;
+  background:#ffffffb3;border-radius:var(--r-row);padding:11px 16px;
+  box-shadow:inset 0 0 0 1px #132b6912;
+}
+.row.head{background:none;box-shadow:none;padding:4px 16px;font-size:12px;color:#132b6980;font-weight:600}
+.dot{width:14px;height:14px;border-radius:50%;box-shadow:inset 0 0 0 1px #132b6930}
+.row .nm{font-family:var(--hand);font-size:26px;line-height:1}   /* 手写体做分类名 */
+.row .h{font-family:var(--numf);font-size:22px;font-weight:700;text-align:right}
+.row .h small{font-size:12px;font-weight:600;opacity:.6;margin-left:3px}
+.row .pc{font-family:var(--numf);font-size:18px;text-align:right;opacity:.85}
+.row .ct{font-size:12.5px;text-align:right;color:#132b6990}
+.mini{height:7px;border-radius:var(--r-pill);background:#132b6910;overflow:hidden}
+.mini i{display:block;height:100%;border-radius:var(--r-pill)}
+
+/* ---------- 进度条 / 提示 / 徽章 ---------- */
+.bar-track{height:12px;border-radius:var(--r-pill);background:#132b6914;overflow:hidden}
+.bar-fill{height:100%;background:linear-gradient(90deg,var(--orange),var(--yellow));border-radius:var(--r-pill);transition:width .25s ease}
+.alert{margin:18px 0 0;padding:12px 16px;border-radius:12px;background:#a00e0012;color:var(--deep);font-size:14px;line-height:1.6;box-shadow:inset 0 0 0 1px #a00e0030}
+.stem{display:flex;flex-wrap:wrap;align-items:center;gap:14px;padding:14px 18px;border-radius:14px;background:#f6c2001a;box-shadow:inset 0 0 0 1px #f6c2005c}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:var(--r-pill);font-size:12px;font-weight:600;background:#132b690d;color:#132b69b0}
+code{background:#132b690d;border-radius:8px;padding:3px 7px;font-size:12.5px;font-family:ui-monospace,Consolas,monospace}
+
+/* ---------- 吸顶导航 ---------- */
+.topbar{position:sticky;top:0;z-index:30;backdrop-filter:blur(10px);background:#fbf8f5e8;border-bottom:1px solid var(--line)}
+.topbar .inner{display:flex;align-items:center;gap:16px;height:62px}
+.brand{font-family:var(--sc);font-weight:900;font-size:17px;letter-spacing:-.01em}
+
+/* ---------- 响应式 ---------- */
+@media (max-width:860px){
+  .kpis{grid-template-columns:repeat(2,1fr)}
+  .row{display:flex;flex-wrap:wrap;gap:6px 10px}
+  .row .mini{flex:1 1 100%}
+  .stage{height:auto}
+  .bar{position:relative;top:auto;height:78px;border-radius:14px;overflow:hidden}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>组件库 · 标准档演示</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Long+Cang&family=Noto+Sans+SC:wght@400;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="ui-kit.css" />
+<link rel="stylesheet" href="ui-components.css" />
+<style>
+  .sec{margin:56px 0}
+  .sec > .lab{font-family:var(--numf);text-transform:uppercase;letter-spacing:.3em;font-size:13px;font-weight:500;color:var(--orange);margin-bottom:4px}
+  .sec > h2{font-family:var(--sc);font-weight:900;font-size:28px;letter-spacing:-.02em;margin:0 0 18px}
+  .demo{background:#ffffffd9;border-radius:var(--r-card);box-shadow:0 1px 0 #132b6922,0 18px 40px -28px #132b6940;padding:26px}
+  .demo + .demo{margin-top:18px}
+  .swatch{display:flex;flex-wrap:wrap;gap:10px}
+  .sw{width:84px;height:64px;border-radius:14px;display:grid;place-items:center;font-family:var(--numf);font-weight:700;font-size:12px;box-shadow:inset 0 0 0 1px #132b6920}
+</style>
+</head>
+<body class="paper">
+<div class="wrap">
+
+  <p class="eyebrow">Design System · Standard Tier</p>
+  <h1 class="title-lg">通用组件演示台</h1>
+  <p class="sub">在 <code>ui-kit.css</code> 令牌基础上，标准档新增的通用组件、布局系统与状态语义。全部沿用同一套视觉语言：纸底、藏青墨、唯一焦橘行动色、网格纸、手写标签、硬投影。</p>
+
+  <!-- 色板 -->
+  <section class="sec">
+    <div class="lab">Palette</div>
+    <h2>颜色令牌</h2>
+    <div class="demo">
+      <div class="swatch">
+        <div class="sw" style="background:var(--paper);color:var(--ink)">paper</div>
+        <div class="sw" style="background:var(--ink);color:#fff">ink</div>
+        <div class="sw" style="background:var(--orange);color:#fff">orange</div>
+        <div class="sw" style="background:var(--deep);color:#fff">deep</div>
+        <div class="sw" style="background:var(--yellow);color:#5a4400">yellow</div>
+      </div>
+      <div class="swatch" style="margin-top:10px">
+        <div class="sw" style="background:var(--ok);color:#fff">ok</div>
+        <div class="sw" style="background:var(--warn);color:#5a4400">warn</div>
+        <div class="sw" style="background:var(--info);color:#fff">info</div>
+        <div class="sw" style="background:var(--err);color:#fff">err</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 按钮 -->
+  <section class="sec">
+    <div class="lab">Buttons</div>
+    <h2>按钮</h2>
+    <div class="demo cluster s3">
+      <button class="btn btn-primary">主行动</button>
+      <button class="btn btn-ghost">次行动</button>
+      <button class="btn btn-danger">危险</button>
+      <button class="btn btn-primary btn-sm">小号</button>
+      <button class="icon-btn">图标按钮</button>
+    </div>
+  </section>
+
+  <!-- 表单 -->
+  <section class="sec">
+    <div class="lab">Forms</div>
+    <h2>表单</h2>
+    <div class="demo grid c2">
+      <div class="field">
+        <label>项目名称</label>
+        <input class="input" placeholder="例如：AI 时间都去哪了">
+        <span class="hint">聚焦时会出现黄色聚焦环。</span>
+      </div>
+      <div class="field">
+        <label>分类</label>
+        <select class="select"><option>闲聊</option><option>修复BUG</option><option>工作</option></select>
+      </div>
+      <div class="field" style="grid-column:1/-1">
+        <label>备注</label>
+        <textarea class="input" placeholder="写点什么…"></textarea>
+      </div>
+      <div class="cluster s4">
+        <label class="check"><input type="checkbox" checked><span class="box"></span>已确认</label>
+        <label class="check radio"><input type="radio" name="r" checked><span class="box"></span>选项 A</label>
+        <label class="check radio"><input type="radio" name="r"><span class="box"></span>选项 B</label>
+        <label class="switch"><input type="checkbox" checked><span class="track"></span><span class="thumb"></span></label>
+      </div>
+    </div>
+  </section>
+
+  <!-- 反馈 -->
+  <section class="sec">
+    <div class="lab">Feedback</div>
+    <h2>反馈与状态</h2>
+    <div class="demo stack s3">
+      <div class="alert">这是危险提示（原站 alert）。</div>
+      <div class="alert alert-ok">操作成功，数据已保存。</div>
+      <div class="alert alert-warn">注意：该项将在 3 天后过期。</div>
+      <div class="alert alert-info">正在后台同步，请稍候。</div>
+      <div class="cluster s3">
+        <span class="tag tag-soft">soft</span>
+        <span class="tag tag-ink">ink</span>
+        <span class="tag tag-orange">orange</span>
+        <span class="tag tag-ok">ok</span>
+        <span class="tag tag-warn">warn</span>
+        <span class="tag tag-info">info</span>
+        <span class="tip" data-tip="纯 CSS 悬浮提示">悬浮我看提示</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 导航结构 -->
+  <section class="sec">
+    <div class="lab">Navigation</div>
+    <h2>导航结构</h2>
+    <div class="demo stack s4">
+      <nav class="breadcrumb">
+        <a href="#">工作台</a><span class="sep">/</span>
+        <a href="#">项目</a><span class="sep">/</span>
+        <span class="cur">AI 时间都去哪了</span>
+      </nav>
+      <div class="tabs">
+        <button class="tab" aria-selected="true">概览</button>
+        <button class="tab" aria-selected="false">明细</button>
+        <button class="tab" aria-selected="false">设置</button>
+      </div>
+      <ul class="menu" style="display:inline-block">
+        <li class="menu-item">✏️ 编辑</li>
+        <li class="menu-item">📋 复制链接</li>
+        <li class="menu-sep"></li>
+        <li class="menu-item danger">🗑️ 删除</li>
+      </ul>
+      <div class="pager">
+        <a class="pg">‹</a><a class="pg">1</a><a class="pg" aria-current="true">2</a><a class="pg">3</a><a class="pg">›</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 手风琴 -->
+  <section class="sec">
+    <div class="lab">Disclosure</div>
+    <h2>手风琴</h2>
+    <div class="demo">
+      <details class="acc-item" open>
+        <summary class="acc-head">统计口径说明 <span class="chev">▾</span></summary>
+        <div class="acc-body">算的不是「窗口开了多久」，而是「你真正在跟它来回折腾了多久」：相邻两条消息间隔相加，单段超 90 分钟算你人走了。</div>
+      </details>
+      <details class="acc-item">
+        <summary class="acc-head">准确率 <span class="chev">▾</span></summary>
+        <div class="acc-body">本地规则判，约 75% 准。判错直接下拉改，改完立刻重算并记录在本机。</div>
+      </details>
+    </div>
+  </section>
+
+  <!-- 数据展示 -->
+  <section class="sec">
+    <div class="lab">Data</div>
+    <h2>数据展示</h2>
+    <div class="demo stack s4">
+      <table class="table">
+        <thead><tr><th>分类</th><th>时长</th><th class="num">占比</th></tr></thead>
+        <tbody>
+          <tr><td><span class="hand" style="font-size:22px">闲聊</span></td><td>2h 10m</td><td class="num">18%</td></tr>
+          <tr><td><span class="hand" style="font-size:22px">修复BUG</span></td><td>3h 42m</td><td class="num">31%</td></tr>
+          <tr><td><span class="hand" style="font-size:22px">工作</span></td><td>6h 05m</td><td class="num">51%</td></tr>
+        </tbody>
+      </table>
+      <div class="cluster s3">
+        <span class="avatar">LX</span>
+        <span class="avatar o">A</span>
+        <span class="avatar i">B</span>
+        <span class="avatar g">C</span>
+      </div>
+      <div class="empty">
+        <div class="ico">📭</div>
+        <p>这里还什么都没有</p>
+        <span class="sub">导入一份会话记录后，数据会显示在这里。</span>
+      </div>
+      <div class="cluster s2" style="width:240px">
+        <span class="skeleton" style="width:60%"></span>
+        <span class="skeleton" style="width:100%"></span>
+        <span class="skeleton" style="width:80%"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 布局 -->
+  <section class="sec">
+    <div class="lab">Layout</div>
+    <h2>布局系统</h2>
+    <div class="demo stack s4">
+      <div class="grid c4">
+        <div class="card" style="padding:18px"><b>卡片 A</b></div>
+        <div class="card" style="padding:18px"><b>卡片 B</b></div>
+        <div class="card" style="padding:18px"><b>卡片 C</b></div>
+        <div class="card" style="padding:18px"><b>卡片 D</b></div>
+      </div>
+      <div class="kpis">
+        <div class="kpi"><div class="lab">会话</div><div class="val num">1,284</div></div>
+        <div class="kpi"><div class="lab">时长</div><div class="val num">36<small>h</small></div></div>
+        <div class="kpi"><div class="lab">分类</div><div class="val num">9</div></div>
+        <div class="kpi"><div class="lab">准确率</div><div class="val num">75<small>%</small></div></div>
+      </div>
+    </div>
+  </section>
+
+  <p class="note" style="margin:40px 0 60px">演示页引用 <code>ui-kit.css</code> + <code>ui-components.css</code>，配套规范见 <code>design-system.md</code>。字体 Long Cang / Noto Sans SC 走 Google Fonts 外链，离线时回退系统字体。</p>
+
+</div>
+</body>
+</html>

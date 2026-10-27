@@ -1,0 +1,20 @@
+{
+  "id": "ai-time-where",
+  "name": "AI 时间都去哪了",
+  "summary": "中文复古印刷海报风格的数据看板：纸底、藏青墨、唯一焦橘行动色、网格纸、手写标签、硬投影。",
+  "styleTags": ["risograph", "handdrawn", "retro"],
+  "useCases": ["dashboard", "tool"],
+  "sourceUrl": "https://ai-time-where.app.workbuddy.host/?sharecode=35XLQ7EOFS",
+  "author": "阿酒",
+  "capturedAt": "2026-10-26",
+  "scope": "partial",
+  "scopeNote": "从原站提炼出的设计系统与组件层（ui-kit.css / ui-components.css / design-system.md），非原站全量源码；原站完整单文件备份见 original.html。",
+  "license": "学习参考",
+  "adapted": true,
+  "techStack": "原生 HTML/CSS/JS，无框架；IIFE 单闭包",
+  "colors": ["#fbf8f5", "#132b69", "#d04e00", "#a00e00", "#f6c200"],
+  "fonts": ["Khand", "Hind", "Long Cang", "Noto Sans SC"],
+  "componentsCovered": ["button", "card", "kpi", "stacked-bar", "segmented", "tag", "alert", "topbar", "input", "switch", "tabs", "accordion", "table", "toast", "modal", "tooltip", "breadcrumb", "pager", "menu", "avatar", "empty", "skeleton", "progress"],
+  "thumbnail": "cover.png",
+  "notes": "UI与文案拆解.md"
+}

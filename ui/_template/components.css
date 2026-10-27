@@ -1,0 +1,26 @@
+/* ============================================================
+   components.css —— 具体组件（基于 tokens.css 的变量）
+   只写你这套 UI 真实覆盖的组件，没覆盖的不写。
+   参考命名：btn / card / kpi / tag / alert / modal / tabs ……
+   ============================================================ */
+
+/* —— 排版基础（引用令牌） —— */
+.eyebrow{font-family:var(--numf);text-transform:uppercase;letter-spacing:.3em;font-size:var(--fs-sm);opacity:.7}
+.title-lg{font-family:var(--sc);font-weight:900;font-size:var(--fs-display);line-height:1.1;letter-spacing:-.02em;margin:0}
+.lede{font-size:var(--fs-body);opacity:.8;max-width:60ch}
+
+/* —— 按钮 —— */
+.btn{display:inline-flex;align-items:center;gap:9px;border:0;border-radius:var(--r-pill);
+  font-family:var(--sc);font-weight:700;padding:14px 24px;font-size:16px;cursor:pointer;
+  transition:transform var(--t-fast),box-shadow var(--t-fast),background var(--t-fast)}
+.btn-primary{background:var(--brand);color:var(--paper);box-shadow:0 4px 0 var(--deep)}
+.btn-primary:active{transform:translateY(4px);box-shadow:none}
+.btn-ghost{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}
+.btn-danger{background:var(--err);color:#fff}
+.btn:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+
+/* —— 卡片 —— */
+.card{background:#ffffffd9;border-radius:var(--r-card);box-shadow:var(--shadow-card);
+  padding:26px 26px 24px}
+
+/* ↓↓↓ 按 notes.md 覆盖的组件，继续往下加（table / tabs / modal / alert …） ↓↓↓ */

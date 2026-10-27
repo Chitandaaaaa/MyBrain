@@ -1,0 +1,20 @@
+{
+  "id": "asset-id",
+  "name": "中文名/可读名（不要写进文件夹名）",
+  "summary": "一句话：什么风格、适合做什么",
+  "styleTags": ["risograph"],
+  "useCases": ["dashboard"],
+  "sourceUrl": "https://... 或 self（自研）/ unknown（未知）",
+  "author": "原作者 或 self / unknown",
+  "capturedAt": "2026-10-28",
+  "scope": "full",
+  "scopeNote": "scope=partial 时必填：抄了哪些区块、漏了哪些；full 时可留空",
+  "license": "学习参考 / 可商用(注明出处) / self(自研) / unknown",
+  "adapted": false,
+  "techStack": "原生 HTML/CSS/JS，无框架",
+  "colors": ["#fbf8f5", "#132b69", "#d04e00"],
+  "fonts": ["Khand", "Long Cang", "Noto Sans SC"],
+  "componentsCovered": ["button", "card", "kpi"],
+  "thumbnail": "cover.png",
+  "notes": "notes.md"
+}

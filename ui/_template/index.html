@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>展示台 · <资产名></title>
+<!-- 字体（按 notes.md 的字体策略引入，外链或本地 fonts/） -->
+<link rel="stylesheet" href="tokens.css" />
+<link rel="stylesheet" href="components.css" />
+<style>
+  /* 仅在展示台用的页面骨架样式，不进组件库 */
+  body{margin:0;font-family:var(--sc,sans-serif);background:var(--paper,#fbf8f5);color:var(--ink,#132b69)}
+  .wrap{max-width:1120px;margin:0 auto;padding:48px 24px}
+  .sec{margin:48px 0}
+  .sec h2{font-size:20px;margin:0 0 16px}
+  .row{display:flex;flex-wrap:wrap;gap:16px;align-items:center}
+  .swatch{width:64px;height:64px;border-radius:12px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.1)}
+  /* 复制按钮（演示用，可删） */
+  .copy{margin-left:auto;font-size:12px;padding:6px 12px;border:1px solid var(--line,#ccc);border-radius:999px;background:#fff;cursor:pointer}
+  pre{background:#fff;border-radius:12px;padding:16px;overflow:auto;font-size:13px}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="sec">
+      <p class="eyebrow">SHOWCASE</p>
+      <h1 class="title-lg"><资产名> 组件展示台</h1>
+      <p class="lede">可视化预览 + 点一下复制代码。完整拆解见 notes.md。</p>
+    </header>
+
+    <!-- 1. 色板 -->
+    <section class="sec">
+      <h2>配色</h2>
+      <div class="row" id="palette"><!-- JS 或手写色块 --></div>
+    </section>
+
+    <!-- 2. 组件演示：每个组件一个 .sec，按 notes.md 覆盖的来 -->
+    <section class="sec">
+      <h2>按钮 Button</h2>
+      <div class="row">
+        <button class="btn btn-primary">主行动</button>
+        <button class="btn btn-ghost">次行动</button>
+        <button class="btn btn-danger">危险</button>
+      </div>
+      <button class="copy" data-copy=".btn-primary">复制 .btn-primary</button>
+      <pre><code>/* 把对应 CSS 贴进来 */</code></pre>
+    </section>
+
+    <!-- 3. 继续加更多组件区块…… -->
+  </div>
+
+  <script>
+    // 可选：点复制按钮把对应代码复制到剪贴板
+    document.querySelectorAll('.copy').forEach(b=>{
+      b.addEventListener('click',()=>{
+        const sel=b.dataset.copy;
+        const el=document.querySelector(sel);
+        if(el) navigator.clipboard.writeText(el.outerHTML+'\n/* 样式见 components.css */');
+      });
+    });
+  </script>
+</body>
+</html>

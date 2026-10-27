@@ -1,0 +1,43 @@
+/* ============================================================
+   tokens.css —— 设计令牌（集中管理，组件层一律引用变量）
+   复制后把 <> 占位换成你这套 UI 的真实值。
+   ============================================================ */
+:root{
+  /* —— 颜色：主色（克制，先定 3–5 个）+ 语义色 —— */
+  --paper:#fbf8f5;      /* 背景：通常不用纯白 */
+  --ink:#132b69;        /* 正文/描边：通常不用纯黑 */
+  --brand:#d04e00;      /* 唯一行动色 */
+  --deep:#a00e00;       /* 硬投影/危险 */
+  --accent:#f6c200;     /* 高亮/聚焦环 */
+  --ok:#3f7d3a; --warn:#f6c200; --info:#0086a8; --err:#a00e00;
+  --line: color-mix(in srgb, var(--ink) 10%, transparent); /* 分割线用主色派生 */
+
+  /* —— 字体：每款角色一个变量 + 回退链 —— */
+  --numf:'Khand','Bahnschrift',Arial Narrow,sans-serif;     /* 数字/英文小标 */
+  --hand:'Long Cang','华文行楷','STXingkai','KaiTi',cursive;/* 手写标签 */
+  --sc:'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif; /* 中文 */
+
+  /* —— 字阶（1.25 比例阶梯，按需增减） —— */
+  --fs-display:40px; --fs-h1:32px; --fs-h2:24px; --fs-h3:20px;
+  --fs-body:16px; --fs-sm:13px;
+
+  /* —— 间距尺度：4 的倍数，组件禁止裸像素 —— */
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px; --s8:64px;
+
+  /* —— 圆角 —— */
+  --r-card:22px; --r-panel:20px; --r-kpi:16px; --r-row:13px; --r-pill:999px;
+
+  /* —— 阴影/描边：薄阴影优先 —— */
+  --shadow-card: 0 18px 40px -28px rgba(0,0,0,.25);
+
+  /* —— 动效 —— */
+  --t-fast:120ms; --t-base:200ms; --ease:cubic-bezier(.2,.9,.3,1.2);
+
+  /* —— 层级 —— */
+  --z-modal:100; --z-toast:200; --z-tooltip:300;
+}
+
+/* 暗色模式（可选）：只覆盖颜色变量，组件样式不改 */
+[data-theme="dark"]{
+  --paper:#0e1116; --ink:#e8edf5; --line: color-mix(in srgb, var(--ink) 12%, transparent);
+}
