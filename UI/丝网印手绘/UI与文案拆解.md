@@ -125,12 +125,50 @@ font-family:'Noto Sans SC',sans-serif; font-weight:900; letter-spacing:-.02em;
 > 另外注意：原站的斜纹**故意做得极淡**（白 7%、18 秒才走 400px），它的作用不是「装饰动画」，而是给大色块加一层油墨纹理，让色块看起来是「印上去的」而不是「填色」。
 > 所以**看不出流动是正常的**；想明显一点，把透明度提到 `.16`–`.22`、时长缩到 `6s` 左右。
 
+### 签名组件 · 手绘标注层（四层结构）
+
+这条色条之所以让人记住，不是因为颜色，而是因为**分类名在条外、用弧线连回色块**。四层，缺一层就散：
+
+```css
+.pcts{position:absolute;inset:0;pointer-events:none}                 /* 2 块内百分比 */
+.pct{position:absolute;display:inline-flex;align-items:baseline;gap:5px;white-space:nowrap;
+  font-family:var(--numf);font-weight:700;font-size:34px;line-height:1;color:var(--ink)}
+.pct i{font-style:normal;font-size:15px;opacity:.85}                  /* % 号降一级 */
+.leads{position:absolute;inset:0;pointer-events:none;overflow:visible} /* 3 引线 */
+.leads path{fill:none;stroke:var(--ink);stroke-width:2.2;stroke-linecap:round;opacity:.85}
+.hand-wrap{position:absolute;top:0;pointer-events:none;will-change:transform} /* 4 标签 */
+.hand-wrap .hand-label{display:block;white-space:nowrap;font-family:var(--hand);line-height:1.05}
+```
+
+**HTML 契约**：`.stage[data-stacked-bar]` 里放 `.bar > .seg-i`（段上写 `data-name` / `data-pct` / `data-dark`）+ 空的 `.pcts` + 空的 `<svg class="leads">`，剩下交给 `js/stacked-bar.js`。
+
+**四条规则（原站就是这么做对的）**：
+
+1. **数字放不下就不画**。分段宽度 < 数字宽 + 16px 时，块内不出百分比，改拼成「搭建运行环境, 3%」。柱子永远占满整行——这条决定了它在 5% 的小段上也不难看。
+2. **双车道避让**。奇数下标走下方车道；同车道从左往右贪心排布，`x = max(自己的中线, 上一个的右边缘 + 间距)`，右边越界整组左推。
+3. **实在放不下才缩字号**，等比 ×0.9、最小 17px、最多 8 轮。宁可字小，不可丢标签。
+4. **引线是三次贝塞尔，落点=分段中线**。控制点走 55% 纵向距离，所以标签被挤偏了也能斜着连回来，不穿色块。终点用 `centers[i]`（实测），不用 `data-pct` 推算。
+
+**为什么必须带 JS**：纯 CSS 无法「测文字宽度 + 避让 + 把 SVG 端点算到某个 DOM 的中线」。100 行、零依赖；`resize` 和 `document.fonts.ready` 各重排一次（Long Cang 是外链字体，到位后宽度会变，不重排就会错位）。窄屏（<560px）整层隐藏，只留块内百分比。
+
+**适用边界**：5–8 段、占比差异大的构成条。段数再多或各段接近等宽，标签会互相推挤、引线交叉，这时退回「色块 + `.row` 图例表格」更稳。
+
 ### 分段控件
 ```css
 .seg{display:inline-flex;background:#132b690d;border-radius:999px;padding:3px}
 .seg button[aria-pressed=true]{background:#fff;color:var(--ink);box-shadow:0 1px 3px #132b6926}
 ```
 墨色 5% 胶囊底槽 + 白色滑块，没有边框也不会糊在一起。
+
+### 设置滑块（range）
+```css
+.sliders{display:grid;gap:26px 40px;grid-template-columns:1fr 1fr}
+.slider{background:#132b6908;border-radius:13px;padding:13px 15px}
+.slider label{display:flex;justify-content:space-between;font-size:13px;font-weight:600;margin-bottom:8px}
+.slider label span{font-family:var(--numf);font-size:15px;font-weight:700;color:var(--orange)}
+input[type=range]{width:100%;accent-color:var(--orange)}
+```
+**关键：不自绘 thumb。** 一条 `accent-color` 就让原生 range 的填充、圆钮、聚焦环全变成焦橘，还白拿键盘操作与无障碍语义。自己写 `::-webkit-slider-thumb` / `::-moz-range-thumb` 等于跨浏览器重造一遍，费力不讨好。原站用它调统计口径（单段间隔封顶 / 离开判定），数值用 Khand + 焦橘和标签同基线；窄屏 `.sliders` 自动单列。
 
 ### 网格纸底纹（整套 UI 的灵魂）
 ```css

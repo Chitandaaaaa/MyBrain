@@ -1,5 +1,5 @@
 {
-  "id": "ai-time-where",
+  "id": "丝网印手绘",
   "name": "AI 时间都去哪了",
   "summary": "中文复古印刷海报风格的数据看板：纸底、藏青墨、唯一焦橘行动色、网格纸、手写标签、硬投影。",
   "styleTags": ["risograph", "handdrawn", "retro"],
@@ -14,7 +14,8 @@
   "techStack": "原生 HTML/CSS/JS，无框架；IIFE 单闭包",
   "colors": ["#fbf8f5", "#132b69", "#d04e00", "#a00e00", "#f6c200"],
   "fonts": ["Khand", "Hind", "Long Cang", "Noto Sans SC"],
-  "componentsCovered": ["button", "card", "kpi", "stacked-bar", "segmented", "tag", "alert", "topbar", "input", "switch", "tabs", "accordion", "table", "toast", "modal", "tooltip", "breadcrumb", "pager", "menu", "avatar", "empty", "skeleton", "progress"],
+  "componentsCovered": ["stacked-bar", "annotation", "button", "card", "kpi", "segmented", "slider", "tag", "alert", "topbar", "input", "switch", "tabs", "accordion", "table", "toast", "modal", "tooltip", "breadcrumb", "pager", "menu", "avatar", "empty", "skeleton", "progress", "link", "footer", "list", "bar-chart"],
+  "signature": ["stacked-bar", "annotation"],
   "thumbnail": "cover.png",
   "notes": "UI与文案拆解.md"
 }

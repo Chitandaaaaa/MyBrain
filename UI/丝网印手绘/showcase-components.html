@@ -47,6 +47,16 @@
     </div>
   </section>
 
+  <!-- 基础：链接 + 页脚 -->
+  <section class="sec">
+    <div class="lab">Foundation</div>
+    <h2>基础 · 链接与页脚</h2>
+    <div class="demo stack s3">
+      <p>正文里夹一个 <a class="link" href="#">带下划线的链接</a>：默认无装饰，鼠标悬停才浮出橘色下划线，正文保持干净（你之前发现漏掉的就是它）。</p>
+      <footer class="footer" style="margin:0;padding:18px 0 8px">© 2026 你的项目 · 数据存于本机 · <a href="#">隐私</a> · <a href="#">关于</a></footer>
+    </div>
+  </section>
+
   <!-- 按钮 -->
   <section class="sec">
     <div class="lab">Buttons</div>
@@ -84,6 +94,13 @@
         <label class="check radio"><input type="radio" name="r"><span class="box"></span>选项 B</label>
         <label class="switch"><input type="checkbox" checked><span class="track"></span><span class="thumb"></span></label>
       </div>
+    </div>
+    <div class="demo">
+      <div class="sliders">
+        <div class="slider"><label>单段间隔封顶 <span>10 分钟</span></label><input type="range" min="1" max="20" step="1" value="10" data-unit="分钟"></div>
+        <div class="slider"><label>离开判定 <span>30 分钟</span></label><input type="range" min="10" max="120" step="5" value="30" data-unit="分钟"></div>
+      </div>
+      <p class="note" style="margin-top:14px">设置滑块：原生 <code>input[type=range]</code> + <code>accent-color:var(--orange)</code>，不自绘 thumb，键盘与无障碍天然可用；拖动时右侧数值实时更新。<code>.sliders</code> 默认两列，窄屏自动单列。</p>
     </div>
   </section>
 
@@ -180,6 +197,29 @@
         <span class="skeleton" style="width:100%"></span>
         <span class="skeleton" style="width:80%"></span>
       </div>
+      <div class="list">
+        <div class="list-item" data-toggle><span class="t">09:12</span><span class="t">设计评审会议</span><span class="meta">45m</span><span class="act">查看</span><div class="list-detail">参与人 5 人，产出 2 份方案稿；结论：下周进入原型阶段。</div></div>
+        <div class="list-item" data-toggle><span class="t">11:40</span><span class="t">修复登录崩溃</span><span class="meta">1h 12m</span><span class="act">查看</span><div class="list-detail">根因：token 过期未刷新；已加拦截器统一处理 401。</div></div>
+        <div class="list-item" data-toggle><span class="t">15:05</span><span class="t">写周报</span><span class="meta">28m</span><span class="act">查看</span><div class="list-detail">本周完成 3 项需求、修复 5 个 bug，下周排期见看板。</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 图表（通用） -->
+  <section class="sec">
+    <div class="lab">Chart</div>
+    <h2>迷你柱图 · 通用 <span style="font-size:13px;font-weight:600;color:#0086a8;border:1px solid #0086a8;border-radius:999px;padding:2px 10px;vertical-align:middle;white-space:nowrap">通用原语</span></h2>
+    <div class="demo">
+      <div class="bar-chart">
+        <div class="col"><div class="fill" style="height:38%"></div><div class="lab">1月</div></div>
+        <div class="col"><div class="fill" style="height:62%"></div><div class="lab">2月</div></div>
+        <div class="col"><div class="fill" style="height:48%"></div><div class="lab">3月</div></div>
+        <div class="col"><div class="fill" style="height:80%"></div><div class="lab">4月</div></div>
+        <div class="col"><div class="fill" style="height:55%"></div><div class="lab">5月</div></div>
+        <div class="col"><div class="fill" style="height:70%"></div><div class="lab">6月</div></div>
+        <div class="col"><div class="fill" style="height:92%"></div><div class="lab">7月</div></div>
+      </div>
+      <p class="note" style="margin-top:14px">通用柱状图：每列 <code>.col</code> 内含 <code>.fill</code>（高度走行内 <code>style="height:%"</code>）+ 底部 <code>.lab</code>；hover 整列变焦橘。这条是独立系列柱图，**纯 CSS、无需 JS**，和签名组件「堆叠条 + 手绘标注」是两回事——后者只在各资产的 <code>index.html</code> 里出现。</p>
     </div>
   </section>
 
@@ -206,5 +246,24 @@
   <p class="note" style="margin:40px 0 60px">演示页引用 <code>ui-kit.css</code> + <code>ui-components.css</code>，配套规范见 <code>design-system.md</code>。字体 Long Cang / Noto Sans SC 走 Google Fonts 外链，离线时回退系统字体。</p>
 
 </div>
+
+<script>
+// 滑块：拖动时把 value 同步到 label 里的 span（单位放 data-unit）
+document.querySelectorAll('.slider input[type=range]').forEach(function(r){
+  var span = r.parentNode.querySelector('label span');
+  if(!span) return;
+  var unit = r.getAttribute('data-unit') || '';
+  function sync(){ span.textContent = r.value + (unit ? ' ' + unit : ''); }
+  r.addEventListener('input', sync); sync();
+});
+
+// 列表行：点击整行切换明细展开（点「查看」不触发展开）
+document.querySelectorAll('.list-item[data-toggle]').forEach(function(it){
+  it.addEventListener('click', function(e){
+    if(e.target.closest('.act')) return;
+    it.classList.toggle('open');
+  });
+});
+</script>
 </body>
 </html>

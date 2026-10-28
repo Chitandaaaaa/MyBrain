@@ -1,5 +1,5 @@
 {
-  "id": "asset-id",
+  "id": "风格名（与文件夹名一致，可中文，如 丝网印手绘）",
   "name": "中文名/可读名（不要写进文件夹名）",
   "summary": "一句话：什么风格、适合做什么",
   "styleTags": ["risograph"],
@@ -15,6 +15,7 @@
   "colors": ["#fbf8f5", "#132b69", "#d04e00"],
   "fonts": ["Khand", "Long Cang", "Noto Sans SC"],
   "componentsCovered": ["button", "card", "kpi"],
+  "signature": [],
   "thumbnail": "cover.png",
-  "notes": "notes.md"
+  "notes": "design-system.md"
 }

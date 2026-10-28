@@ -1,7 +1,7 @@
 /* ============================================================
-   components.css —— 具体组件（基于 tokens.css 的变量）
+   ui-components.css —— 具体组件（基于 ui-kit.css 的变量）
    只写你这套 UI 真实覆盖的组件，没覆盖的不写。
-   参考命名：btn / card / kpi / tag / alert / modal / tabs ……
+   组件 id 对齐 STANDARD.md 第 3 节「组件注册表」（如 button / card / kpi / slider / link / list …）。
    ============================================================ */
 
 /* —— 排版基础（引用令牌） —— */
@@ -23,4 +23,4 @@
 .card{background:#ffffffd9;border-radius:var(--r-card);box-shadow:var(--shadow-card);
   padding:26px 26px 24px}
 
-/* ↓↓↓ 按 notes.md 覆盖的组件，继续往下加（table / tabs / modal / alert …） ↓↓↓ */
+/* ↓↓↓ 按 design-system.md 覆盖的组件，继续往下加（table / tabs / modal / alert …） ↓↓↓ */
