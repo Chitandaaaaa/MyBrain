@@ -1,0 +1,21 @@
+{
+  "_comment": "服装品类 AI 匹配服务配置。key 一律走环境变量，禁止写入明文。改这里即可切换模型/底座，无需动代码。",
+  "llm": {
+    "provider": "openai-compatible",
+    "baseUrl": "https://api.openai.com/v1",
+    "apiKeyEnv": "LLM_API_KEY",
+    "model": "gpt-4o-mini",
+    "temperature": 0.2,
+    "maxTokens": 800,
+    "timeoutMs": 20000
+  },
+  "matching": {
+    "topK": 5,
+    "minConfidence": 0.3,
+    "fallback": "keyword"
+  },
+  "prompts": {
+    "system": "你是一个服装品类匹配助手。用户会用口语化、可能模糊的中文描述一件衣服（例如：'到膝盖下面、毛茸茸的长外套'、'领口有小扣子的短袖'）。你的任务是从下方【服装分类体系】中找出最匹配的一个或多个品类。\n\n规则：\n1. 只能使用【服装分类体系】里出现的'大类'与'子类'名称，禁止自造品类。\n2. 同一描述可能对应多个子类（如'呢子大衣' = 大衣 + 面料羊毛呢），应返回所有合理匹配。\n3. 若描述明显不匹配任何品类，返回空数组 []。\n4. 对模糊描述要宽容，用同义词、材质、长度、风格等线索推断。\n\n输出：严格只返回 JSON 数组，元素格式：{\"cat\":\"大类\",\"sub\":\"子类\",\"confidence\":0.0~1.0,\"reason\":\"简短中文理由\"}。不要输出任何额外文字。",
+    "userTemplate": "【服装分类体系】\n{{TAXONOMY}}\n\n【用户描述】\n{{DESCRIPTION}}"
+  }
+}

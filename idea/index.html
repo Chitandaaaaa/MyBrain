@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>MyBrain · 速记工作台</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+    <!-- 侧栏：速记 + 检索（PC 左栏 / 移动端顶部堆叠） -->
+    <aside class="sidebar">
+      <div class="brand">
+        <span class="logo">🧠</span>
+        <div>
+          <h1>MyBrain</h1>
+          <p>写一句 / 说一句，AI 帮你归好类</p>
+        </div>
+      </div>
+
+      <!-- 速记输入框 -->
+      <div class="capture">
+        <textarea id="input" class="input" rows="2" placeholder="写点什么，或点麦克风说话…"></textarea>
+        <div class="capture-actions">
+          <button id="micBtn" class="mic" title="语音输入">🎤</button>
+          <button id="sendBtn" class="send">发送</button>
+        </div>
+      </div>
+
+      <div id="recHint" class="rec-hint">🎙️ 正在听… 再次点击麦克风结束</div>
+
+      <!-- 视图导航 -->
+      <nav class="nav">
+        <button class="nav-item active" data-nav="inbox">📥 收件箱</button>
+        <button class="nav-item" data-nav="all">🗂️ 全部</button>
+        <button class="nav-item" data-nav="archived">📦 已归档</button>
+      </nav>
+
+      <!-- 类型筛选 -->
+      <div class="filters">
+        <div class="filter-title">类型</div>
+        <div class="chips" id="typeChips"></div>
+        <div class="filter-title">标签</div>
+        <div class="chips" id="tagCloud"><span class="muted-sm">尚无标签</span></div>
+      </div>
+
+      <button id="settingsBtn" class="settings-link">⚙️ AI 配置</button>
+    </aside>
+
+    <!-- 主区：搜索 + 条目流 -->
+    <main class="main">
+      <header class="main-head">
+        <h2 id="viewTitle">收件箱</h2>
+        <div class="search">
+          <span class="search-ic">🔍</span>
+          <input id="search" placeholder="搜索标题、内容、标签、来源…" />
+          <button id="clearSearch" class="clear-search hidden">✕</button>
+        </div>
+      </header>
+      <section id="feed" class="feed"></section>
+    </main>
+  </div>
+
+  <!-- 设置弹层 -->
+  <div id="settingsModal" class="modal hidden">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h2>AI 配置</h2>
+        <button id="closeSettings" class="icon-btn">✕</button>
+      </div>
+      <p class="modal-sub">接入你本地的 AI（OpenAI 兼容接口），用于自动分类与整理。</p>
+      <label>API 地址（Base URL）
+        <input id="cfgBase" class="field" placeholder="http://localhost:8000/v1" />
+      </label>
+      <label>API Key
+        <input id="cfgKey" class="field" type="password" placeholder="sk-...（本地可留空）" />
+      </label>
+      <label>模型名
+        <input id="cfgModel" class="field" placeholder="如 gpt-4o-mini / local-model" />
+      </label>
+      <label>语音处理方式
+        <select id="cfgVoice" class="field">
+          <option value="recorder">录音后自动处理（推荐，全浏览器可用）</option>
+          <option value="speech">浏览器实时转写（Chrome/Edge，需联网）</option>
+        </select>
+      </label>
+      <label class="check">
+        <input id="cfgJson" type="checkbox" checked /> 要求模型以 JSON 输出（如接口不支持请取消）
+      </label>
+      <button id="saveCfg" class="btn primary block">保存</button>
+      <p id="cfgStatus" class="cfg-status"></p>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+  <script src="app.js"></script>
+</body>
+</html>
